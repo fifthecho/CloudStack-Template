@@ -22,6 +22,7 @@ for log in "${logs[@]}"
 do 
   /bin/rm -f $log
 done
+service rsyslog restart
 
 HOST_NAME=`grep host-name /var/lib/dhc*/dhclient*leas* | awk '{print $NF}' | tr -d '\;' | tr -d '"' | uniq`
 echo "Setting hostname to $HOST_NAME" 

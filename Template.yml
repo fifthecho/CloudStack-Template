@@ -48,12 +48,7 @@
       template: src=templates/ifcfg-rhel.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{adapter_name.stdout}} mode=0644
     - name: remove udev network naming (RHEL) (1/2)
       when: ansible_os_family == "RedHat"
-      command: echo "# Disabled" > /etc/udev/rules.d/70-persistent-net.rules
-      ignore_errors: true
-    - name: remove udev network naming (RHEL) (2/2)
-      when: ansible_os_family == "RedHat"
-      command: chattr +i /etc/udev/rules.d/70-persistent-net.rules
-      ignore_errors: true
+      file: path=/etc/udev/rules.d/70-persistent-net.rules state=absent
 
     - name: setup networking (Debian)
       when: ansible_os_family == "Debian"

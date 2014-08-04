@@ -21,6 +21,11 @@
     - links
     - sudo
     - git
+    - rsyslog
 - name: update system (Debian)
   when: ansible_os_family == "Debian"
   apt: upgrade=dist update_cache=yes
+- name: disable sysklogd (if present)
+  service: name=sysklogd state=disabled
+- name: enable rsyslog (if not)
+  service: name=rsyslog state=enabled

@@ -16,7 +16,6 @@
 . /lib/lsb/init-functions
 start_daemon () {
   echo "Initializing Virtual Machine..." 
-  /usr/sbin/service rsyslog restart
   if [ -f /lib/init/upstart-job ]
   then
     /sbin/dhclient
@@ -28,7 +27,8 @@ start_daemon () {
   do 
     /bin/rm -f $log
   done
- 
+  /usr/sbin/service rsyslog restart
+  
   HOST_NAME=`grep host-name /var/lib/dhc*/dhclient*leas* | awk '{print $NF}' | tr -d '\;' | tr -d '"' | uniq`
   echo $HOST_NAME > /etc/hostname
   echo "Setting hostname to $HOST_NAME" 
