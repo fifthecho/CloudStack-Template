@@ -1,0 +1,12 @@
+[Unit]
+Description=CloudStack First Boot
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/etc/init.d/firstboot-cloudstack
+
+[Install]
+WantedBy=multi-user.target
+
+# This service file runs the firstboot-cloudstack

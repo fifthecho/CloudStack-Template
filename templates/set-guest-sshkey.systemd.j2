@@ -1,0 +1,12 @@
+[Unit]
+Description=CloudStack Guest SSH Key Reset
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/share/cloudstack/cloudstack-set-guest-sshkey start
+
+[Install]
+WantedBy=multi-user.target
+
+# This service file runs the cloudstack-set-guest-password

@@ -48,3 +48,8 @@ echo "$IP      $HOST_NAME" >> /etc/hosts
 /usr/bin/yum clean all
 
 chkconfig firstboot-cloudstack off
+
+if [ -f /usr/bin/systemd-run ]
+  then
+    systemctl disable firstboot-cloudstack
+  fi

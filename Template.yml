@@ -6,6 +6,12 @@
     - name: setup packages for Debian/Ubuntu
       include: Template-Packages-Debian.yml
 
+    - name: disable sysklogd (if present)
+      service: name=syslog enabled=no
+      ignore_errors: true
+    - name: enable rsyslog (if not)
+      service: name=rsyslog enabled=yes
+
     - name: remove cloud user
       user: name=cloud state=absent
 
@@ -73,6 +79,12 @@
     - name: setup cloudstack-set-guest-sshkey (upstart)
       when: ansible_distribution == "Ubuntu"
       template: src=templates/set-guest-sshkey.upstart.j2 dest=/etc/init/cloudstack-set-guest-sshkey mode=0644
+    - name: setup cloudstack-set-guest-sshkey (systemd)
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 7
+      template: src=templates/set-guest-sshkey.systemd.j2 dest=/usr/lib/systemd/system/cloudstack-set-guest-sshkey.service mode=0644 
+    - name: setup cloudstack-set-guest-password (systemd)
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 7
+      template: src=templates/set-guest-password.systemd.j2 dest=/usr/lib/systemd/system/cloudstack-set-guest-password.service mode=0644
 
     - name: enable cloudstack-password service
       service: name=cloudstack-set-guest-password enabled=yes
