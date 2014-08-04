@@ -1,0 +1,83 @@
+#!/bin/bash 
+#
+# Flush all things not needed for a new VM and create default network environment
+#
+# chkconfig: 235 90 02
+# description: Prepare new VM
+### BEGIN INIT INFO
+# Provides:          firstboot-cloudstack
+# Required-Start:    $network $local_fs $remote_fs $syslog $all
+# Required-Stop:     $network $local_fs $remote_fs $syslog $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Prepare new VM
+# Description:       Prepare new VM by flushing old information and preparing network environment
+### END INIT INFO
+. /lib/lsb/init-functions
+start_daemon () {
+  echo "Initializing Virtual Machine..." 
+  /usr/sbin/service rsyslog restart
+  if [ -f /lib/init/upstart-job ]
+  then
+    /sbin/dhclient
+  fi
+  logger -t "Setup" "Initializing Virtual Machine..."
+  cd /var/log/
+  declare -a logs=("auth.log" "boot" "boot.log" "btmp" "daemon.log" "debug" "dmesg*" "dpkg.log" "faillog" "kern.log" "lastlog" "*.log" "lpr.log" "mail.*" "messages" "pycentral.log" "secure" "syslog" "udev" "ufw.log" "user.log" "wtmp")
+  for log in "${logs[@]}"
+  do 
+    /bin/rm -f $log
+  done
+ 
+  HOST_NAME=`grep host-name /var/lib/dhc*/dhclient*leas* | awk '{print $NF}' | tr -d '\;' | tr -d '"' | uniq`
+  echo $HOST_NAME > /etc/hostname
+  echo "Setting hostname to $HOST_NAME" 
+  logger -t "Setup" "Setting hostname to $HOST_NAME"
+  /bin/hostname $HOST_NAME
+
+  echo "# Do not remove the following line, or various programs" > /etc/hosts
+  echo "# that require network functionality will fail." >> /etc/hosts
+  echo "127.0.0.1       localhost.localdomain localhost" >> /etc/hosts
+  echo "# The following lines are desirable for IPv6 capable hosts" >> /etc/hosts
+  echo "::1             ip6-localhost ip6-loopback" >> /etc/hosts
+  echo "fe00::0         ip6-localnet" >> /etc/hosts
+  echo "ff00::0         ip6-mcastprefix" >> /etc/hosts
+  echo "ff02::1         ip6-allnodes" >> /etc/hosts
+  echo "ff02::2         ip6-allrouters" >> /etc/hosts
+  echo "::1             localhost6.localdomain6 localhost6" >> /etc/hosts
+  IP=`grep fixed-address /var/lib/dhc*/dhclient*leas* | awk '{print $NF}' | tr -d '\;' | uniq`
+  echo "$IP      $HOST_NAME" >> /etc/hosts
+  echo "Setting up /etc/hosts for IP address $IP" 
+  logger -t "Setup" "Setting up /etc/hosts for IP address $IP"
+
+  /usr/sbin/dpkg-reconfigure --force openssh-server
+  /usr/sbin/service ssh restart
+
+  /usr/sbin/update-rc.d firstboot-cloudstack disable
+  /usr/sbin/update-rc.d firstboot remove
+  if [ -f /lib/init/upstart-job ]
+  then
+    echo manual >> /etc/init/firstboot-cloudstack.override
+  fi
+  
+}
+
+case "$1" in
+    start)             
+        log_daemon_msg "Starting $NAME daemon" "$NAME"
+        start_daemon
+        log_end_msg 0
+        ;;
+    stop)
+        log_daemon_msg "Stopping $NAME daemon" "$NAME"
+        log_end_msg 0
+        ;;
+    restart)
+        log_daemon_msg "Restarting $NAME daemon" "$NAME"
+        log_end_msg 0
+        ;;
+    *)
+        echo "Usage: /etc/init.d/$NAME {start|stop|restart}"
+        exit 2
+        ;;
+esac

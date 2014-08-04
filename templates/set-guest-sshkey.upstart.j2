@@ -1,0 +1,8 @@
+# cloudstack-set-guest-sshkey
+
+description "set root sshkeys from CloudStack metadata"
+
+start on startup
+
+task
+exec /usr/share/cloudstack/cloudstack-set-guest-sshkey

@@ -1,0 +1,30 @@
+---
+- name: install EPEL (RHEL 5)
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 5
+  yum: name=http://mirror.pnl.gov/epel/5/i386/epel-release-5-4.noarch.rpm state=present
+- name: install EPEL (RHEL 6)
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 6
+  yum: name=http://mirror.pnl.gov/epel/6/i386/epel-release-6-8.noarch.rpm state=present
+- name: install EPEL (RHEL 7)
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 7
+  yum: name=http://mirror.pnl.gov/epel/beta/7/x86_64/epel-release-7-0.2.noarch.rpm state=present
+- name: install "core" packages (RHEL)
+  when: ansible_os_family == "RedHat"
+  yum: name={{ item }} state=latest
+  with_items:
+    - vim-enhanced
+    - screen
+    - tmux
+    - curl
+    - wget
+    - lynx
+    - links
+    - sudo
+    - libselinux-python
+    - git
+- name: update system (RHEL)
+  when: ansible_os_family == "RedHat"
+  command: yum upgrade -y
+- name: set selinux to permissive
+  when: ansible_os_family == "RedHat"
+  selinux: policy=targeted state=permissive
