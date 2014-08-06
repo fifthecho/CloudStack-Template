@@ -1,0 +1,16 @@
+---
+- name: add cloud-firstboot script (RHEL)
+  when: ansible_os_family == "RedHat"
+  template: src=templates/firstboot-rhel.sh.j2 dest=/usr/share/cloudstack/cloudstack-firstboot mode=0755
+
+- name: setup firstboot-cloudstack (init)
+  when: upstart.stat.exists == false and systemd.stat.exists == false
+  file: state=link force=yes src=/usr/share/cloudstack/cloudstack-firstboot dest=/etc/init.d/cloudstack-firstboot mode=0755
+
+- name: setup firstboot-cloudstack (upstart)
+  when: upstart.stat.exists == true and systemd.stat.exists == false
+  template: src=templates/firstboot.upstart.j2 dest=/etc/init/firstboot-cloudstack.conf mode=0644
+
+- name: setup firstboot-cloudstack (systemd)
+  when: upstart.stat.exists == false and systemd.stat.exists == true
+  template: src=templates/firstboot.systemd.j2 dest=/usr/lib/systemd/system/firstboot-cloudstack.service mode=0644

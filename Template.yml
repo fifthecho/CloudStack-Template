@@ -15,6 +15,15 @@
     - name: remove cloud user
       user: name=cloud state=absent
 
+    - name: remove old init files
+      file: path={{ item }} state=absent
+      with_items: 
+        - /etc/init.d/firstboot-cloudstack
+        - /etc/init.d/cloudstack-run-userdata
+        - /etc/init.d/cloudstack-set-guest-password
+        - /etc/init.d/cloudstack-set-guest-sshkey
+
+
     - name: add CloudStack login splash (Ubuntu)
       template: src=templates/motd.j2 dest=/etc/motd.tail
       when: ansible_distribution == "Ubuntu"
@@ -24,77 +33,41 @@
     - name: create ssh directory
       file: state=directory mode=0700 path=/root/.ssh
 
-    - name: create directory to store password and ssh key scripts
+    - name: create directory to store cloudstack client scripts
       file: state=directory mode=0755 path=/usr/share/cloudstack
-    - name: add cloud-set-guest-sshkey script (RHEL)
-      when: ansible_os_family == "RedHat"
-      template: src=templates/cloud-set-guest-sshkey-centos.j2 dest=/usr/share/cloudstack/cloudstack-set-guest-sshkey mode=0755
-    - name: add cloud-set-guest-password script (RHEL)
-      when: ansible_os_family == "RedHat"
-      template: src=templates/cloud-set-guest-password-centos.j2 dest=/usr/share/cloudstack/cloudstack-set-guest-password mode=0755
-    - name: add cloud-set-guest-sshkey script (Debian)
-      when: ansible_distribution == "Debian"
-      template: src=templates/cloud-set-guest-sshkey-debian.j2 dest=/usr/share/cloudstack/cloudstack-set-guest-sshkey mode=0755
-    - name: add cloud-set-guest-password script (Debian)
-      when: ansible_distribution == "Debian"
-      template: src=templates/cloud-set-guest-password-debian.j2 dest=/usr/share/cloudstack/cloudstack-set-guest-password mode=0755
-    - name: add cloud-set-guest-sshkey script (Ubuntu)
-      when: ansible_distribution == "Ubuntu"
-      template: src=templates/cloud-set-guest-sshkey-ubuntu.j2 dest=/usr/share/cloudstack/cloudstack-set-guest-sshkey mode=0755
-    - name: add cloud-set-guest-password script (Debian)
-      when: ansible_distribution == "Ubuntu"
-      template: src=templates/cloud-set-guest-password-ubuntu.j2 dest=/usr/share/cloudstack/cloudstack-set-guest-password mode=0755
 
-    - name: register primary network adapter name
-      shell: "ip link | grep UP | grep -v LOOPBACK | awk -F':' '{print $2}' | tr -d ' '"
-      register: adapter_name
+    - name: register init system variables
+      include: Template-Test-Init-System.yml
 
-    - name: setup networking (RHEL)
-      when: ansible_os_family == "RedHat"
-      template: src=templates/ifcfg-rhel.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{adapter_name.stdout}} mode=0644
-    - name: remove udev network naming (RHEL) (1/2)
-      when: ansible_os_family == "RedHat"
-      file: path=/etc/udev/rules.d/70-persistent-net.rules state=absent
+    - name: setup cloudstack-set-guest-password
+      include: Template-Cloud-Password.yml
+    - name: setup cloudstack-set-guest-sshkey
+      include: Template-Cloud-SSH-Key.yml
+    - name: setup cloudstack-run-userdata
+      include: Template-Cloud-Userdata.yml
+    - name: setup cloudstack-firstboot
+      include: Template-Cloud-Firstboot.yml
 
-    - name: setup networking (Debian)
-      when: ansible_os_family == "Debian"
-      template: src=templates/ifcfg-debian.j2 dest=/etc/network/interfaces mode=0644
-
-    - name: setup firstboot-cloudstack (RHEL)
-      when: ansible_os_family == "RedHat"
-      template: src=templates/firstboot-rhel.sh.j2 dest=/etc/init.d/firstboot-cloudstack mode=0755
-    - name: setup firstboot-cloudstack (Debian)
-      when: ansible_os_family == "Debian"
-      template: src=templates/firstboot-debian.sh.j2 dest=/etc/init.d/firstboot-cloudstack mode=0755
-    - name: setup firstboot-cloudstack (Ubuntu)
-      when: ansible_distribution == "Ubuntu"
-      template: src=templates/firstboot.upstart.j2 dest=/etc/init/firstboot-cloudstack mode=0644
-    - name: setup cloudstack-set-guest-password (init)
-      file: state=link src=/usr/share/cloudstack/cloudstack-set-guest-password dest=/etc/init.d/cloudstack-set-guest-password mode=0755 force=yes
-    - name: setup cloudstack-set-guest-sshkey (init)
-      file: state=link src=/usr/share/cloudstack/cloudstack-set-guest-sshkey dest=/etc/init.d/cloudstack-set-guest-sshkey mode=0755 force=yes
-    - name: setup cloudstack-set-guest-password (upstart)
-      when: ansible_distribution == "Ubuntu"
-      template: src=templates/set-guest-password.upstart.j2 dest=/etc/init/cloudstack-set-guest-password mode=0644
-    - name: setup cloudstack-set-guest-sshkey (upstart)
-      when: ansible_distribution == "Ubuntu"
-      template: src=templates/set-guest-sshkey.upstart.j2 dest=/etc/init/cloudstack-set-guest-sshkey mode=0644
-    - name: setup cloudstack-set-guest-sshkey (systemd)
-      when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 7
-      template: src=templates/set-guest-sshkey.systemd.j2 dest=/usr/lib/systemd/system/cloudstack-set-guest-sshkey.service mode=0644 
-    - name: setup cloudstack-set-guest-password (systemd)
-      when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 7
-      template: src=templates/set-guest-password.systemd.j2 dest=/usr/lib/systemd/system/cloudstack-set-guest-password.service mode=0644
+    - name: register upstart services
+      when: upstart.stat.exists == true and systemd.stat.exists == false
+      shell: initctl reload-configuration
+    - name: register systemd services
+      when: upstart.stat.exists == false and systemd.stat.exists == true
+      shell: systemctl daemon-reload
 
     - name: enable cloudstack-password service
       service: name=cloudstack-set-guest-password enabled=yes
     - name: enable cloudstack-sshkey service
       service: name=cloudstack-set-guest-sshkey enabled=yes
+    - name: enable cloudstack-userdata service
+      service: name=cloudstack-run-userdata enabled=yes
     - name: enable firstboot-cloudstack service
       service: name=firstboot-cloudstack enabled=yes
 
     - name: remove upstart overrides (if present)
       file: path=/etc/init/firstboot-cloudstack.override state=absent
+    - name: remove userdata lock (if present)
+      file: path=/var/lib/cloud/user-data.ran state=absent
     - name: remove shell history
       shell: rm -f /root/.*history*
     - name: remove dhcp history

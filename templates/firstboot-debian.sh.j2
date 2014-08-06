@@ -16,10 +16,6 @@
 . /lib/lsb/init-functions
 start_daemon () {
   echo "Initializing Virtual Machine..." 
-  if [ -f /lib/init/upstart-job ]
-  then
-    /sbin/dhclient
-  fi
   logger -t "Setup" "Initializing Virtual Machine..."
   cd /var/log/
   declare -a logs=("auth.log" "boot" "boot.log" "btmp" "daemon.log" "debug" "dmesg*" "dpkg.log" "faillog" "kern.log" "lastlog" "*.log" "lpr.log" "mail.*" "messages" "pycentral.log" "secure" "syslog" "udev" "ufw.log" "user.log" "wtmp")
@@ -28,6 +24,21 @@ start_daemon () {
     /bin/rm -f $log
   done
   /usr/sbin/service rsyslog restart
+
+  for DHCP_FILE in $DHCP_FOLDERS; do
+    if [ -f $DHCP_FILE ]; then
+      logger -t "Setup" "DHCP file exists. No need to restart dhclient"
+    else
+      logger -t "Setup" "DHCP file does not exist. Restarting dhclient"
+      DHCLIENT_PID=$(ps ax | grep dhclient | awk {'print $1'})
+      if [ -n $DHCLIENT_PID ]; then
+        for CLIENTPID in $DHCLIENT_PID; do
+          kill $CLIENTPID
+        done
+    fi
+      dhclient
+    fi
+  done
   
   HOST_NAME=`grep host-name /var/lib/dhc*/dhclient*leas* | awk '{print $NF}' | tr -d '\;' | tr -d '"' | uniq`
   echo $HOST_NAME > /etc/hostname
@@ -57,7 +68,7 @@ start_daemon () {
   /usr/sbin/update-rc.d firstboot remove
   if [ -f /lib/init/upstart-job ]
   then
-    echo manual >> /etc/init/firstboot-cloudstack.override
+    echo manual > /etc/init/firstboot-cloudstack.override
   fi
   
 }

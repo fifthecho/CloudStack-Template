@@ -1,0 +1,24 @@
+---    
+- name: add cloud-set-guest-sshkey script (RHEL)
+  when: ansible_os_family == "RedHat"
+  template: src=templates/cloud-set-guest-sshkey-centos.j2 dest=/usr/share/cloudstack/cloudstack-set-guest-sshkey mode=0755
+
+- name: add cloud-set-guest-sshkey script (Debian)
+  when: ansible_distribution == "Debian"
+  template: src=templates/cloud-set-guest-sshkey-debian.j2 dest=/usr/share/cloudstack/cloudstack-set-guest-sshkey mode=0755
+
+- name: add cloud-set-guest-sshkey script (Ubuntu)
+  when: ansible_distribution == "Ubuntu"
+  template: src=templates/cloud-set-guest-sshkey-ubuntu.j2 dest=/usr/share/cloudstack/cloudstack-set-guest-sshkey mode=0755
+
+- name: setup cloudstack-set-guest-sshkey (init)
+  when: upstart.stat.exists == false and systemd.stat.exists == false
+  file: state=link src=/usr/share/cloudstack/cloudstack-set-guest-sshkey dest=/etc/init.d/cloudstack-set-guest-sshkey mode=0755 force=yes
+
+- name: setup cloudstack-set-guest-sshkey (upstart)
+  when: upstart.stat.exists == true and systemd.stat.exists == false
+  template: src=templates/set-guest-sshkey.upstart.j2 dest=/etc/init/cloudstack-set-guest-sshkey.conf mode=0644
+
+- name: setup cloudstack-set-guest-sshkey (systemd)
+  when: upstart.stat.exists == false and systemd.stat.exists == true
+  template: src=templates/set-guest-sshkey.systemd.j2 dest=/usr/lib/systemd/system/cloudstack-set-guest-sshkey.service mode=0644 

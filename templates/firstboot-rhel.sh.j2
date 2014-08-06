@@ -24,6 +24,22 @@ do
 done
 service rsyslog restart
 
+DHCLIENT=$(which dhclient)
+for DHCP_FILE in $DHCP_FOLDERS; do
+  if [ -f $DHCP_FILE ]; then
+      logger -t "cloud" "DHCP file exists. No need to restart dhclient"
+  else
+      logger -t "cloud" "DHCP file does not exist. Restarting dhclient"
+      DHCLIENT_PID=$(ps ax | grep dhclient | awk {'print $1'})
+      if [ -n $DHCLIENT_PID ]; then
+            for CLIENTPID in $DHCLIENT_PID; do
+              kill $CLIENTPID
+            done
+      fi
+      $DHCLIENT
+  fi
+done
+
 HOST_NAME=`grep host-name /var/lib/dhc*/dhclient*leas* | awk '{print $NF}' | tr -d '\;' | tr -d '"' | uniq`
 echo "Setting hostname to $HOST_NAME" 
 logger -t "Setup" "Setting hostname to $HOST_NAME"

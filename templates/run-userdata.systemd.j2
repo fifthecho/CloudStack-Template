@@ -1,0 +1,12 @@
+[Unit]
+Description=CloudStack User Data
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/share/cloudstack/cloudstack-run-userdata start
+
+[Install]
+WantedBy=multi-user.target
+
+# This service file runs the cloudstack userdata

@@ -1,0 +1,11 @@
+---
+- name: test for systemd
+  stat: path=/usr/lib/systemd/system get_md5=no
+  register: systemd
+
+- name: test for upstart
+  stat: path=/lib/init/upstart-job get_md5=no
+  register: upstart
+
+- debug: var=systemd
+- debug: var=systemd

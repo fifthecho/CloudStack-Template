@@ -1,0 +1,16 @@
+---
+- name: register primary network adapter name
+  shell: "ip link | grep UP | grep -v LOOPBACK | awk -F':' '{print $2}' | tr -d ' '"
+  register: adapter_name
+
+- name: setup networking (RHEL)
+  when: ansible_os_family == "RedHat"
+  template: src=templates/ifcfg-rhel.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{adapter_name.stdout}} mode=0644
+
+- name: remove udev network naming (RHEL)
+  when: ansible_os_family == "RedHat"
+  file: path=/etc/udev/rules.d/70-persistent-net.rules state=absent
+
+- name: setup networking (Debian)
+  when: ansible_os_family == "Debian"
+  template: src=templates/ifcfg-debian.j2 dest=/etc/network/interfaces mode=0644

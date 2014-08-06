@@ -26,6 +26,22 @@ function cloud_set_guest_sshkey() {
     keys_received=0
     file_count=0
 
+    DHCLIENT=$(which dhclient)
+    for DHCP_FILE in $DHCP_FOLDERS; do
+      if [ -f $DHCP_FILE ]; then
+          logger -t "cloud" "DHCP file exists. No need to restart dhclient"
+      else
+          logger -t "cloud" "DHCP file does not exist. Restarting dhclient"
+          DHCLIENT_PID=$(ps ax | grep dhclient | awk {'print $1'})
+          if [ -n $DHCLIENT_PID ]; then
+                for CLIENTPID in $DHCLIENT_PID; do
+                  kill $CLIENTPID
+                done
+          fi
+          $DHCLIENT
+      fi
+    done
+
     for DHCP_FILE in $DHCP_FOLDERS; do
         if [ -f $DHCP_FILE ]; then
             file_count=$((file_count+1))
