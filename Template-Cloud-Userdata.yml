@@ -1,20 +1,17 @@
 ---
-- name: Register init variables
-  include: Template-Test-Init-System.yml
-
 - name: add cloud-run-cloud-userdata script
   template: src=templates/cloud-run-userdata.j2 dest=/usr/share/cloudstack/cloudstack-run-userdata mode=0755
 
 - name: setup cloudstack-set-guest-password (init)
   when: upstart.stat.exists == false and systemd.stat.exists == false
-  file: state=link src=/usr/share/cloudstack/cloudstack-set-guest-password dest=/etc/init.d/cloudstack-set-guest-password mode=0755 force=yes
+  file: state=link src=/usr/share/cloudstack/cloudstack-run-userdata dest=/etc/init.d/cloudstack-run-userdata mode=0755 force=yes
 
 - name: setup cloudstack-set-guest-password (upstart)
   # when: ansible_distribution == "Ubuntu"
   when: upstart.stat.exists == true and systemd.stat.exists == false
-  template: src=templates/set-guest-password.upstart.j2 dest=/etc/init/cloudstack-set-guest-password.conf mode=0644
+  template: src=templates/run-userdata.upstart.j2 dest=/etc/init/cloudstack-run-userdata.conf mode=0644
 
 - name: setup cloudstack-set-guest-password (systemd)
   # when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 7
   when: upstart.stat.exists == false and systemd.stat.exists == true
-  template: src=templates/set-guest-password.systemd.j2 dest=/usr/lib/systemd/system/cloudstack-set-guest-password.service mode=0644
+  template: src=templates/run-userdata.systemd.j2 dest=/usr/lib/systemd/system/cloudstack-run-userdata.service mode=0644

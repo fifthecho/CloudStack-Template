@@ -14,33 +14,54 @@
 # Description:       Prepare new VM by flushing old information and preparing network environment
 ### END INIT INFO
 . /lib/lsb/init-functions
+
+function find_lease() {
+  # Determine primary network adapter name
+  NIC=`ip link | grep UP | grep -v LOOPBACK | awk -F':' '{print $2}' | tr -d ' '`
+
+  # Add your DHCP lease folders here
+  if [ -f /etc/debian_version ]; then
+    # Ubuntu
+    #DHCP_FOLDERS="/var/lib/dhcpcd/dhcpcd-eth0.*"
+    DHCP_FOLDERS="/var/lib/dhclient/*$NIC* /var/lib/dhcp3/*$NIC* /var/lib/dhcp/*$NIC*"
+  elif [ -f /etc/redhat-release ]; then
+    # Redhat / CentOS / Scientific Linux
+    DHCP_FOLDERS="/var/lib/dhclient/*$NIC* /var/lib/dhcp3/*$NIC*"
+  else
+    # Others
+    DHCP_FOLDERS="/var/lib/dhclient/*$NIC* /var/lib/dhcp3/*$NIC*"
+  fi
+
+  DHCLIENT=$(which dhclient)
+  RESTART_DHCLIENT=true
+  for DHCP_FILE in $DHCP_FOLDERS; do
+    if [ -f $DHCP_FILE ]; then
+        LEASE_FILE=$DHCP_FILE
+        logger -t "cloud" "DHCP file ($LEASE_FILE) exists. No need to restart dhclient."
+        RESTART_DHCLIENT=false
+    fi
+  done
+
+  if [ $RESTART_DHCLIENT = true ]; then
+    logger -t "cloud" "DHCP file does not exist. Restarting dhclient."
+    DHCLIENT_PID=$(ps ax | grep dhclient | awk {'print $1'})
+    if [ -n $DHCLIENT_PID ]; then
+          for CLIENTPID in $DHCLIENT_PID; do
+            kill $CLIENTPID
+          done
+    fi
+    $DHCLIENT
+    find_lease
+  fi
+}
+
 start_daemon () {
   echo "Initializing Virtual Machine..." 
   logger -t "Setup" "Initializing Virtual Machine..."
-  cd /var/log/
-  declare -a logs=("auth.log" "boot" "boot.log" "btmp" "daemon.log" "debug" "dmesg*" "dpkg.log" "faillog" "kern.log" "lastlog" "*.log" "lpr.log" "mail.*" "messages" "pycentral.log" "secure" "syslog" "udev" "ufw.log" "user.log" "wtmp")
-  for log in "${logs[@]}"
-  do 
-    /bin/rm -f $log
-  done
-  /usr/sbin/service rsyslog restart
-
-  for DHCP_FILE in $DHCP_FOLDERS; do
-    if [ -f $DHCP_FILE ]; then
-      logger -t "Setup" "DHCP file exists. No need to restart dhclient"
-    else
-      logger -t "Setup" "DHCP file does not exist. Restarting dhclient"
-      DHCLIENT_PID=$(ps ax | grep dhclient | awk {'print $1'})
-      if [ -n $DHCLIENT_PID ]; then
-        for CLIENTPID in $DHCLIENT_PID; do
-          kill $CLIENTPID
-        done
-    fi
-      dhclient
-    fi
-  done
+ 
+  find_lease
   
-  HOST_NAME=`grep host-name /var/lib/dhc*/dhclient*leas* | awk '{print $NF}' | tr -d '\;' | tr -d '"' | uniq`
+  HOST_NAME=`grep host-name $LEASE_FILE | awk '{print $NF}' | tr -d '\;' | tr -d '"' | uniq`
   echo $HOST_NAME > /etc/hostname
   echo "Setting hostname to $HOST_NAME" 
   logger -t "Setup" "Setting hostname to $HOST_NAME"
@@ -56,7 +77,7 @@ start_daemon () {
   echo "ff02::1         ip6-allnodes" >> /etc/hosts
   echo "ff02::2         ip6-allrouters" >> /etc/hosts
   echo "::1             localhost6.localdomain6 localhost6" >> /etc/hosts
-  IP=`grep fixed-address /var/lib/dhc*/dhclient*leas* | awk '{print $NF}' | tr -d '\;' | uniq`
+  IP=`grep fixed-address $LEASE_FILE| awk '{print $NF}' | tr -d '\;' | uniq`
   echo "$IP      $HOST_NAME" >> /etc/hosts
   echo "Setting up /etc/hosts for IP address $IP" 
   logger -t "Setup" "Setting up /etc/hosts for IP address $IP"

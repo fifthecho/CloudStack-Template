@@ -18,50 +18,68 @@ set -e
 # Modify this line to specify the user (default is root)
 user=root
 
-# Add your DHCP lease folders here
-DHCP_FOLDERS="/var/lib/dhcp/*"
+function find_lease() {
+  # Determine primary network adapter name
+  NIC=`ip link | grep UP | grep -v LOOPBACK | awk -F':' '{print $2}' | tr -d ' '`
+
+  # Add your DHCP lease folders here
+  if [ -f /etc/debian_version ]; then
+    # Ubuntu
+    #DHCP_FOLDERS="/var/lib/dhcpcd/dhcpcd-eth0.*"
+    DHCP_FOLDERS="/var/lib/dhclient/*$NIC* /var/lib/dhcp3/*$NIC* /var/lib/dhcp/*$NIC*"
+  elif [ -f /etc/redhat-release ]; then
+    # Redhat / CentOS / Scientific Linux
+    DHCP_FOLDERS="/var/lib/dhclient/*$NIC* /var/lib/dhcp3/*$NIC*"
+  else
+    # Others
+    DHCP_FOLDERS="/var/lib/dhclient/*$NIC* /var/lib/dhcp3/*$NIC*"
+  fi
+
+  DHCLIENT=$(which dhclient)
+  RESTART_DHCLIENT=true
+  for DHCP_FILE in $DHCP_FOLDERS; do
+    if [ -f $DHCP_FILE ]; then
+        LEASE_FILE=$DHCP_FILE
+        logger -t "cloud" "DHCP file ($LEASE_FILE) exists. No need to restart dhclient."
+        RESTART_DHCLIENT=false
+    fi
+  done
+
+  if [ $RESTART_DHCLIENT = true ]; then
+    logger -t "cloud" "DHCP file does not exist. Restarting dhclient."
+    DHCLIENT_PID=$(ps ax | grep dhclient | awk {'print $1'})
+    if [ -n $DHCLIENT_PID ]; then
+          for CLIENTPID in $DHCLIENT_PID; do
+            kill $CLIENTPID
+          done
+    fi
+    $DHCLIENT
+    find_lease
+  fi
+}
 
 function cloud_set_guest_sshkey() {
 
     keys_received=0
     file_count=0
 
-    DHCLIENT=$(which dhclient)
-    for DHCP_FILE in $DHCP_FOLDERS; do
-      if [ -f $DHCP_FILE ]; then
-          logger -t "cloud" "DHCP file exists. No need to restart dhclient"
-      else
-          logger -t "cloud" "DHCP file does not exist. Restarting dhclient"
-          DHCLIENT_PID=$(ps ax | grep dhclient | awk {'print $1'})
-          if [ -n $DHCLIENT_PID ]; then
-                for CLIENTPID in $DHCLIENT_PID; do
-                  kill $CLIENTPID
-                done
-          fi
-          $DHCLIENT
-      fi
-    done
+    find_lease
 
-    for DHCP_FILE in $DHCP_FOLDERS; do
-        if [ -f $DHCP_FILE ]; then
-            file_count=$((file_count+1))
-            SSHKEY_SERVER_IP=$(grep dhcp-server-identifier $DHCP_FILE | tail -1 | awk '{print $NF}' | tr -d '\;')
+    SSHKEY_SERVER_IP=$(grep dhcp-server-identifier $LEASE_FILE | tail -1 | awk '{print $NF}' | tr -d '\;')
 
-            if [ -n $SSHKEY_SERVER_IP ]; then
-                logger -t "cloud" "Sending request to ssh key server at $SSHKEY_SERVER_IP"
+    if [ -n $SSHKEY_SERVER_IP ]; then
+        logger -t "cloud" "Sending request to ssh key server at $SSHKEY_SERVER_IP"
 
-                publickey=$(wget -t 3 -T 20 -O - http://$SSHKEY_SERVER_IP/latest/public-keys 2>/dev/null)
+        publickey=$(wget -t 3 -T 20 -O - http://$SSHKEY_SERVER_IP/latest/public-keys 2>/dev/null)
 
-                if [ $? -eq 0 ]; then
-                    logger -t "cloud" "Got response from server at $SSHKEY_SERVER_IP"
-                    keys_received=1
-                    break
-                fi
-            else
-                logger -t "cloud" "Could not find ssh key server IP in $DHCP_FILE"
-            fi
+        if [ $? -eq 0 ]; then
+            logger -t "cloud" "Got response from server at $SSHKEY_SERVER_IP"
+            keys_received=1
+            break
         fi
-    done
+    else
+        logger -t "cloud" "Could not find ssh key server IP in $LEASE_FILE"
+    fi
 
     # did we find the keys anywhere?
     if [ "$keys_received" == "0" ]; then

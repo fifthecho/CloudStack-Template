@@ -1,0 +1,8 @@
+# Centos5  ansible_ssh_user=root ansible_ssh_pass=wU8mpgjvq ansible_ssh_host=10.10.0.223
+# Centos6  ansible_ssh_user=root ansible_ssh_pass=wE6awwgmk ansible_ssh_host=10.10.0.163
+# Centos7  ansible_ssh_user=root ansible_ssh_pass=cU7nhnjuc ansible_ssh_host=10.10.0.102
+Debian6  ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.107
+Debian7  ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.171
+Ubuntu10 ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.108
+Ubuntu12 ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.109
+Ubuntu14 ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.110

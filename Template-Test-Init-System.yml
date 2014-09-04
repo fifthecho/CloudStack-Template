@@ -7,5 +7,5 @@
   stat: path=/lib/init/upstart-job get_md5=no
   register: upstart
 
-- debug: var=systemd
-- debug: var=systemd
+#- debug: var=systemd
+#- debug: var=systemd

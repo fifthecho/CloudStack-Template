@@ -1,7 +1,8 @@
 ---
 - name: install EPEL (RHEL 5)
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 5
-  yum: name=http://mirror.pnl.gov/epel/5/i386/epel-release-5-4.noarch.rpm state=present
+  shell: rpm -Uvh http://mirror.pnl.gov/epel/5/i386/epel-release-5-4.noarch.rpm
+  ignore_errors: true
 - name: install EPEL (RHEL 6)
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 6
   yum: name=http://mirror.pnl.gov/epel/6/i386/epel-release-6-8.noarch.rpm state=present

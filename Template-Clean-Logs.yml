@@ -1,0 +1,48 @@
+---
+- hosts: all
+  gather_facts: no
+  tasks:
+  - name: clean old logs
+    file: path={{ item }} state=absent
+    with_items:
+      - /var/log/auth.log
+      - /var/log/boot
+      - /var/log/boot.log
+      - /var/log/btmp
+      - /var/log/daemon.log
+      - /var/log/debug
+      - /var/log/dmesg
+      - /var/log/dpkg.log
+      - /var/log/faillog
+      - /var/log/kern.log
+      - /var/log/lastlog
+      - /var/log/lpr.log
+      - /var/log/mail.err
+      - /var/log/mail.info
+      - /var/log/mail.log
+      - /var/log/mail.warn
+      - /var/log/maillog
+      - /var/log/messages
+      - /var/log/pycentral.log
+      - /var/log/secure
+      - /var/log/udev
+      - /var/log/ufw.log
+      - /var/log/user.log
+      - /var/log/wtmp
+      - /var/log/yum.log
+      - /var/spool/mail/root
+  - name: clean really old logs
+    command: rm -f {{ item }}
+    with_items:
+      - /var/log/*old
+      - /var/log/*0
+      - /var/log/upstart/*
+      - /var/log/sa/*
+    ignore_errors: true
+
+  - name: recreate required logs
+    file: path={{ item }} state=touch
+    with_items:
+      - /var/log/messages
+      - /var/log/syslog
+      - /var/log/lastlog

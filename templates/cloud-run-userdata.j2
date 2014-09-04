@@ -1,5 +1,4 @@
 #!/bin/bash
-sleep 10
 #
 # Init file for User-Data download and execution
 #
@@ -17,37 +16,51 @@ sleep 10
 
 # Modify this line to specify the user (default is root)
 user=root
- 
-# Add your DHCP lease folders here
-if [ -f /etc/debian_version ]; then
-  # Ubuntu
-  #DHCP_FOLDERS="/var/lib/dhcpcd/dhcpcd-eth0.*"
-  DHCP_FOLDERS="/var/lib/dhclient/* /var/lib/dhcp3/* /var/lib/dhcp/*"
-elif [ -f /etc/redhat-release ]; then
-  # Redhat / CentOS / Scientific Linux
-  DHCP_FOLDERS="/var/lib/dhclient/* /var/lib/dhcp3/*"
-else
-  # Others
-  DHCP_FOLDERS="/var/lib/dhclient/* /var/lib/dhcp3/*"
-fi
 
-DHCLIENT=$(which dhclient)
-for DHCP_FILE in $DHCP_FOLDERS; do
-  if [ -f $DHCP_FILE ]; then
-      logger -t "cloud" "DHCP file exists. No need to restart dhclient"
+function find_lease() {
+  # Determine primary network adapter name
+  NIC=`ip link | grep UP | grep -v LOOPBACK | awk -F':' '{print $2}' | tr -d ' '`
+
+  # Add your DHCP lease folders here
+  if [ -f /etc/debian_version ]; then
+    # Ubuntu
+    #DHCP_FOLDERS="/var/lib/dhcpcd/dhcpcd-eth0.*"
+    DHCP_FOLDERS="/var/lib/dhclient/*$NIC* /var/lib/dhcp3/*$NIC* /var/lib/dhcp/*$NIC*"
+  elif [ -f /etc/redhat-release ]; then
+    # Redhat / CentOS / Scientific Linux
+    DHCP_FOLDERS="/var/lib/dhclient/*$NIC* /var/lib/dhcp3/*$NIC*"
   else
-      logger -t "cloud" "DHCP file does not exist. Restarting dhclient"
-      DHCLIENT_PID=$(ps ax | grep dhclient | awk {'print $1'})
-      if [ -n $DHCLIENT_PID ]; then
-            for CLIENTPID in $DHCLIENT_PID; do
-              kill $CLIENTPID
-            done
-      fi
-      $DHCLIENT
+    # Others
+    DHCP_FOLDERS="/var/lib/dhclient/*$NIC* /var/lib/dhcp3/*$NIC*"
   fi
-done
 
-HOSTNAME=`grep host-name /var/lib/dhc*/dhc*.lease* | awk '{print $NF}' | tr -d '\;' | tr -d '"' | uniq`
+  DHCLIENT=$(which dhclient)
+  RESTART_DHCLIENT=true
+  for DHCP_FILE in $DHCP_FOLDERS; do
+    if [ -f $DHCP_FILE ]; then
+        LEASE_FILE=$DHCP_FILE
+        logger -t "cloud" "DHCP file ($LEASE_FILE) exists. No need to restart dhclient."
+        RESTART_DHCLIENT=false
+    fi
+  done
+
+  if [ $RESTART_DHCLIENT = true ]; then
+    logger -t "cloud" "DHCP file does not exist. Restarting dhclient."
+    DHCLIENT_PID=$(ps ax | grep dhclient | awk {'print $1'})
+    if [ -n $DHCLIENT_PID ]; then
+          for CLIENTPID in $DHCLIENT_PID; do
+            kill $CLIENTPID
+          done
+    fi
+    $DHCLIENT
+    find_lease
+  fi
+}
+
+find_lease
+echo "Using DHCP lease from $LEASE_FILE"
+
+HOSTNAME=`grep host-name $LEASE_FILE | awk '{print $NF}' | tr -d '\;' | tr -d '"' | uniq`
 CLOUD_DIR=/var/lib/cloud/instances/$HOSTNAME
 USER_DATA=/var/lib/cloud/instances/$HOSTNAME/user-data
 LOCK=/var/lib/cloud/user-data.ran
@@ -65,43 +78,26 @@ then
   mkdir -p $CLOUD_DIR
 fi
 
-for DHCP_FILE in $DHCP_FOLDERS
-do
-  if [ -f $DHCP_FILE ]
+
+USER_DATA_SERVER_IP=$(grep dhcp-server-identifier $LEASE_FILE | tail -1 | awk '{print $NF}' | tr -d '\;')
+if [ -n $USER_DATA_SERVER_IP ]
+then
+  logger -t "cloud" "Sending request to USER-DATA server at $USER_DATA_SERVER_IP"
+  wget -t 3 -T 20 -O $USER_DATA http://$USER_DATA_SERVER_IP/latest/user-data 2>/dev/null
+  if [ $? -eq 0 ]
   then
-    file_count=$((file_count+1))
-  if [ -f /etc/debian_version ]; then
-    # Ubuntu
-    #USER_DATA_SERVER_IP=$(grep DHCPSID $DHCP_FILE | tail -1 |  egrep -o '([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})' )
-    USER_DATA_SERVER_IP=$(grep dhcp-server-identifier $DHCP_FILE | tail -1 | awk '{print $NF}' | tr -d '\;')
-  elif [ -f /etc/redhat-release ]; then
-    # Redhat / CentOS / Scientific Linux
-    USER_DATA_SERVER_IP=$(grep dhcp-server-identifier $DHCP_FILE | tail -1 | awk '{print $NF}' | tr -d '\;')
+    logger -t "cloud" "Got user-data from server at $USER_DATA_SERVER_IP"
+    if [ -s $USER_DATA ]; then
+      chmod 600 $USER_DATA
+      user_data_received=1
+    else
+      logger -t "cloud" "User-data is empty"
+    fi
+  fi
   else
-    # Others
-    USER_DATA_SERVER_IP=$(grep dhcp-server-identifier $DHCP_FILE | tail -1 | awk '{print $NF}' | tr -d '\;')
+    logger -t "cloud" "Could not find user-data server IP in $LEASE_FILE"
   fi
 
-  if [ -n $USER_DATA_SERVER_IP ]
-  then
-    logger -t "cloud" "Sending request to USER-DATA server at $USER_DATA_SERVER_IP"
-    wget -t 3 -T 20 -O $USER_DATA http://$USER_DATA_SERVER_IP/latest/user-data 2>/dev/null
-    if [ $? -eq 0 ]
-    then
-      logger -t "cloud" "Got user-data from server at $USER_DATA_SERVER_IP"
-      if [ -s $USER_DATA ]; then
-        chmod 600 $USER_DATA
-        user_data_received=1
-      else
-        logger -t "cloud" "User-data is empty"
-      fi
-      break
-    fi
-    else
-      logger -t "cloud" "Could not find user-data server IP in $DHCP_FILE"
-    fi
-  fi
-done
 # did we get the user-data?
 if [ "$user_data_received" == "0" ]
 then
