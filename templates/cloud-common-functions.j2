@@ -7,24 +7,29 @@ function find_lease() {
   if [ -f /etc/debian_version ]; then
     # Ubuntu
     #DHCP_FOLDERS="/var/lib/dhcpcd/dhcpcd-eth0.*"
-    DHCP_FOLDERS="/var/lib/dhclient/*$NIC* /var/lib/dhcp3/*$NIC* /var/lib/dhcp/*$NIC* "
+    DHCP_FOLDERS="/var/lib/dhclient/ /var/lib/dhcp3/ /var/lib/dhcp/"
   elif [ -f /etc/redhat-release ]; then
     # Redhat / CentOS / Scientific Linux
-    DHCP_FOLDERS="/var/lib/dhclient/*$NIC* /var/lib/dhcp3/*$NIC*"
+    DHCP_FOLDERS="/var/lib/dhclient/ /var/lib/dhcp3/"
   else
     # Others
-    DHCP_FOLDERS="/var/lib/dhclient/*$NIC* /var/lib/dhcp3/*$NIC*"
+    DHCP_FOLDERS="/var/lib/dhclient/ /var/lib/dhcp3/"
   fi
+
+  for TEST_DIRECTORY in $DHCP_FOLDERS; do
+    if [ -d $TEST_DIRECTORY ]; then
+      LEASE_DIRECTORY=$TEST_DIRECTORY
+    fi
+  done
 
   DHCLIENT=$(which dhclient)
   RESTART_DHCLIENT=true
-  for DHCP_FILE in $DHCP_FOLDERS; do
-    if [ -f $DHCP_FILE ]; then
-        LEASE_FILE=$DHCP_FILE
+
+  if [ -e $LEASE_DIRECTORY/*$NIC* ]; then
+        LEASE_FILE=$(ls $LEASE_DIRECTORY*$NIC*)
         logger -t "cloud" "DHCP file ($LEASE_FILE) exists. No need to restart dhclient."
         RESTART_DHCLIENT=false
-    fi
-  done
+  fi
 
   if [ $RESTART_DHCLIENT = true ]; then
     logger -t "cloud" "DHCP file does not exist. Restarting dhclient."
@@ -32,9 +37,11 @@ function find_lease() {
     if [ -n $DHCLIENT_PID ]; then
           for CLIENTPID in $DHCLIENT_PID; do
             kill $CLIENTPID
+            rm -f /var/run/dhc*
           done
     fi
-    $DHCLIENT
+    $DHCLIENT -v -lf $LEASE_DIRECTORY/dhclient-$NIC.leases -pf /var/run/dhclient-$NIC.pid $NIC
+    sleep 5
     find_lease
   fi
 
