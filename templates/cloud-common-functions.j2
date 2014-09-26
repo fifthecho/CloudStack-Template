@@ -1,0 +1,43 @@
+#!/bin/bash
+function find_lease() {
+  # Determine primary network adapter name
+  NIC=`ip link | grep UP | grep -v LOOPBACK | awk -F':' '{print $2}' | tr -d ' '`
+
+  # Add your DHCP lease folders here
+  if [ -f /etc/debian_version ]; then
+    # Ubuntu
+    #DHCP_FOLDERS="/var/lib/dhcpcd/dhcpcd-eth0.*"
+    DHCP_FOLDERS="/var/lib/dhclient/*$NIC* /var/lib/dhcp3/*$NIC* /var/lib/dhcp/*$NIC* "
+  elif [ -f /etc/redhat-release ]; then
+    # Redhat / CentOS / Scientific Linux
+    DHCP_FOLDERS="/var/lib/dhclient/*$NIC* /var/lib/dhcp3/*$NIC*"
+  else
+    # Others
+    DHCP_FOLDERS="/var/lib/dhclient/*$NIC* /var/lib/dhcp3/*$NIC*"
+  fi
+
+  DHCLIENT=$(which dhclient)
+  RESTART_DHCLIENT=true
+  for DHCP_FILE in $DHCP_FOLDERS; do
+    if [ -f $DHCP_FILE ]; then
+        LEASE_FILE=$DHCP_FILE
+        logger -t "cloud" "DHCP file ($LEASE_FILE) exists. No need to restart dhclient."
+        RESTART_DHCLIENT=false
+    fi
+  done
+
+  if [ $RESTART_DHCLIENT = true ]; then
+    logger -t "cloud" "DHCP file does not exist. Restarting dhclient."
+    DHCLIENT_PID=$(ps ax | grep dhclient | grep -v grep | uniq | awk {'print $1'})
+    if [ -n $DHCLIENT_PID ]; then
+          for CLIENTPID in $DHCLIENT_PID; do
+            kill $CLIENTPID
+          done
+    fi
+    $DHCLIENT
+    find_lease
+  fi
+
+  echo "Using DHCP lease from $LEASE_FILE"
+  logger -t "cloud" "Using DHCP lease from $LEASE_FILE"
+}

@@ -1,8 +1,14 @@
-# Centos5  ansible_ssh_user=root ansible_ssh_pass=wU8mpgjvq ansible_ssh_host=10.10.0.223
-# Centos6  ansible_ssh_user=root ansible_ssh_pass=wE6awwgmk ansible_ssh_host=10.10.0.163
-# Centos7  ansible_ssh_user=root ansible_ssh_pass=cU7nhnjuc ansible_ssh_host=10.10.0.102
-Debian6  ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.107
-Debian7  ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.171
-Ubuntu10 ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.108
-Ubuntu12 ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.109
-Ubuntu14 ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.110
+# Centos5  ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.223
+Centos6-KVM ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.133
+Centos6-Xen ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.0.102 ansible_ssh_port=2220
+# Centos7  ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.102
+# Debian6  ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.107
+Debian7-KVM ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.141
+Debian7-Xen ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.0.102 ansible_ssh_port=22
+# Ubuntu10 ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.108
+# Ubuntu12 ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.109
+# Ubuntu14 ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.10.0.110
+
+
+# D7T1-X 
+# D7T1-K 

@@ -30,6 +30,9 @@
     - name: register init system variables
       include: Template-Test-Init-System.yml
 
+    - name: setup common functions for init scripts
+      include: Template-Cloud-Functions.yml
+
     - name: setup cloudstack-set-guest-password
       include: Template-Cloud-Password.yml
     - name: setup cloudstack-set-guest-sshkey
@@ -60,7 +63,7 @@
     - name: remove userdata lock (if present)
       file: path=/var/lib/cloud/user-data.ran state=absent
     - name: remove userdata history
-      shell: rm -f /var/lib/cloud/instances/*
+      shell: rm -Rf /var/lib/cloud/instances/*
     - name: remove shell history
       shell: rm -f /root/.*history*
     - name: remove dhcp history

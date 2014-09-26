@@ -2,7 +2,7 @@
 
 description "set root sshkeys from CloudStack metadata"
 
-start on local-filesystems
+start on started network-services
 
 task
 exec /usr/share/cloudstack/cloudstack-firstboot start

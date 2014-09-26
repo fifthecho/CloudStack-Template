@@ -7,14 +7,14 @@
   when: ansible_os_family == "Debian"
   template: src=templates/firstboot-debian.sh.j2 dest=/usr/share/cloudstack/cloudstack-firstboot mode=0755
 
-- name: setup firstboot-cloudstack (init)
+- name: setup cloudstack-firstboot (init)
   when: upstart.stat.exists == false and systemd.stat.exists == false
   file: state=link force=yes src=/usr/share/cloudstack/cloudstack-firstboot dest=/etc/init.d/cloudstack-firstboot mode=0755
 
-- name: setup firstboot-cloudstack (upstart)
+- name: setup cloudstack-firstboot (upstart)
   when: upstart.stat.exists == true and systemd.stat.exists == false
   template: src=templates/firstboot.upstart.j2 dest=/etc/init/cloudstack-firstboot.conf mode=0644
 
-- name: setup firstboot-cloudstack (systemd)
+- name: setup cloudstack-firstboot (systemd)
   when: upstart.stat.exists == false and systemd.stat.exists == true
   template: src=templates/firstboot.systemd.j2 dest=/usr/lib/systemd/system/cloudstack-firstboot.service mode=0644

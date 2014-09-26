@@ -1,6 +1,11 @@
 ---
-- name: add cloud-run-cloud-userdata script
-  template: src=templates/cloud-run-userdata.j2 dest=/usr/share/cloudstack/cloudstack-run-userdata mode=0755
+- name: add cloud-run-cloud-userdata script (RHEL)
+  when: ansible_os_family == "RedHat"
+  template: src=templates/cloud-run-userdata-rhel.j2 dest=/usr/share/cloudstack/cloudstack-run-userdata mode=0755
+
+- name: add cloud-run-cloud-userdata script (Debian)
+  when: ansible_os_family == "Debian"
+  template: src=templates/cloud-run-userdata-debian.j2 dest=/usr/share/cloudstack/cloudstack-run-userdata mode=0755
 
 - name: setup cloudstack-set-guest-password (init)
   when: upstart.stat.exists == false and systemd.stat.exists == false

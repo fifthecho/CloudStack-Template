@@ -13,6 +13,7 @@
   when: ansible_os_family == "RedHat"
   yum: name={{ item }} state=latest
   with_items:
+    - openssh-clients
     - vim-enhanced
     - screen
     - tmux
