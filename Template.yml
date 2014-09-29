@@ -73,3 +73,5 @@
       include: Template-Clean-Logs.yml
     - name: remove shell history
       shell: rm -f /root/.*history*
+    - name: remove ssh keys
+      shell: rm -f /etc/ssh/*host*key*
