@@ -1,7 +1,7 @@
 CloudStack-Template
 ===================
 
-#Ansible Playbook for creating CloudStack templates
+## Ansible Playbook for creating CloudStack templates
 
 These plays have been tested and work against:
 * Red Hat Enterprise Linux (and derivatives [Scientific/Centos/Oracle])
@@ -21,7 +21,7 @@ Once Ansible is installed, you will need to modify the hosts file to reflect the
 
 The Playbook is executed by having this directory as your current working directory and executing: ansible-playbook -i ./hosts ./Template.yml
 
-##What this Playbook provides
+### What this Playbook provides
 
 This playbook:
 * installs a suite of standard packages across all distributions, including curl, wget, lynx, screen, and tmux.
