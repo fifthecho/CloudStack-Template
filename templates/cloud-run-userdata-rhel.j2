@@ -18,11 +18,10 @@
 user=root
 
 . /usr/share/cloudstack/cloudstack-common-functions
-
+sleep $[ 1 + $[ RANDOM % 10 ]]
 find_lease
-echo "Using DHCP lease from $LEASE_FILE"
 
-HOSTNAME=`grep host-name $LEASE_FILE | awk '{print $NF}' | tr -d '\;' | tr -d '"' | uniq`
+HOSTNAME=`grep host-name $LEASE_FILE | uniq | awk '{print $NF}' | tr -d '\;' | tr -d '"' | uniq`
 CLOUD_DIR=/var/lib/cloud/instances/$HOSTNAME
 USER_DATA=/var/lib/cloud/instances/$HOSTNAME/user-data
 LOCK=/var/lib/cloud/user-data.ran

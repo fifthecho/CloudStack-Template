@@ -20,7 +20,6 @@
 start_daemon () {
   echo "Initializing Virtual Machine..." 
   logger -t "Setup" "Initializing Virtual Machine..."
- 
   find_lease
   
   HOST_NAME=`grep host-name $LEASE_FILE | awk '{print $NF}' | tr -d '\;' | tr -d '"' | uniq`
@@ -39,7 +38,7 @@ start_daemon () {
   echo "ff02::1         ip6-allnodes" >> /etc/hosts
   echo "ff02::2         ip6-allrouters" >> /etc/hosts
   echo "::1             localhost6.localdomain6 localhost6" >> /etc/hosts
-  IP=`grep fixed-address $LEASE_FILE| awk '{print $NF}' | tr -d '\;' | uniq`
+  IP=`grep fixed-address $LEASE_FILE | awk '{print $NF}' | tr -d '\;' | uniq`
   echo "$IP      $HOST_NAME" >> /etc/hosts
   echo "Setting up /etc/hosts for IP address $IP" 
   logger -t "Setup" "Setting up /etc/hosts for IP address $IP"

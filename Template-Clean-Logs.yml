@@ -22,6 +22,7 @@
     - /var/log/messages
     - /var/log/pycentral.log
     - /var/log/secure
+    - /var/log/syslog
     - /var/log/udev
     - /var/log/ufw.log
     - /var/log/user.log
@@ -29,7 +30,7 @@
     - /var/log/yum.log
     - /var/spool/mail/root
 - name: clean really old logs
-  command: rm -f {{ item }}
+  shell: rm -f {{ item }}
   with_items:
     - /var/log/*old
     - /var/log/*0
@@ -37,6 +38,7 @@
     - /var/log/sa/*
     - /var/log/dmesg*
     - /var/log/*-201*
+    - /var/log/*gz
   ignore_errors: true
 
 - name: recreate required logs

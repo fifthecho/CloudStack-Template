@@ -16,10 +16,8 @@
 
 . /usr/share/cloudstack/cloudstack-common-functions
 
-
 echo "Initializing Virtual Machine..."
 logger -t "Setup" "Initializing Virtual Machine..."
-
 find_lease
 
 HOST_NAME=`grep host-name $LEASE_FILE | awk '{print $NF}' | tr -d '\;' | tr -d '"' | uniq`

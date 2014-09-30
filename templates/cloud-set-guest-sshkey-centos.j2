@@ -27,13 +27,12 @@ user=root
 
 
 function cloud_set_guest_sshkey() {
-
     keys_received=0
     file_count=0
-    
+    sleep $[ 1 + $[ RANDOM % 10 ]]
     find_lease
         
-    SSHKEY_SERVER_IP=$(grep dhcp-server-identifier $LEASE_FILE | tail -1 | awk '{print $NF}' | tr -d '\;')
+    SSHKEY_SERVER_IP=$(grep dhcp-server-identifier $LEASE_FILE | uniq | tail -1 | awk '{print $NF}' | tr -d '\;')
 
     if [ -n $SSHKEY_SERVER_IP ]; then
         logger -t "cloud" "Sending request to ssh key server at $SSHKEY_SERVER_IP"

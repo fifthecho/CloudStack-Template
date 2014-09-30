@@ -19,10 +19,8 @@ user=root
 . /usr/share/cloudstack/cloudstack-common-functions
 
 function cloud_run_userdata {
-
+  sleep $[ 1 + $[ RANDOM % 10 ]]
   find_lease
-  echo "Using DHCP lease from $LEASE_FILE"
-
   HOSTNAME=`grep host-name $LEASE_FILE | awk '{print $NF}' | tr -d '\;' | tr -d '"' | uniq`
   CLOUD_DIR=/var/lib/cloud/instances/$HOSTNAME
   USER_DATA=/var/lib/cloud/instances/$HOSTNAME/user-data
@@ -42,7 +40,7 @@ function cloud_run_userdata {
   fi
 
 
-  USER_DATA_SERVER_IP=$(grep dhcp-server-identifier $LEASE_FILE | tail -1 | awk '{print $NF}' | tr -d '\;')
+  USER_DATA_SERVER_IP=$(grep dhcp-server-identifier $LEASE_FILE | uniq | tail -1 | awk '{print $NF}' | tr -d '\;')
   if [ -n $USER_DATA_SERVER_IP ]
   then
     logger -t "cloud" "Sending request to USER-DATA server at $USER_DATA_SERVER_IP"
