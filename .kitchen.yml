@@ -15,6 +15,7 @@ driver_config:
 provisioner:
   name: ansible_playbook
   hosts: all
+  playbook: Template.yml
   require_ansible_repo: true
 
 platforms:
@@ -36,7 +37,7 @@ platforms:
       cloudstack_template_id: cda26ace-9e9a-4355-bdae-9961838d36ff
   - name: Ubuntu-10
     driver:
-      cloudstack_template_id: 2aa20494-aaee-4bc2-8e2f-be392f1efdfb
+      cloudstack_template_id: cd123a4e-859d-43be-9353-f4781790dc04
 
   - name: Debian-7
     driver:
