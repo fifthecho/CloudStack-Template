@@ -1,0 +1,50 @@
+---
+driver:
+  name: cloudstack
+
+driver_config:
+  cloudstack_api_url: http://cloudstack.fifthecho.com:8080/client/api
+  cloudstack_api_key: ycEWIN17Pjazd9AN5AVdpE0ObrTWJhBuAXxBkJvhLgKz6Caq0Vq9v0vhpNXraOhb72Pk8d4kRwjbAwv_3fxIyg
+  cloudstack_secret_key: Uv6i5BIJYFKLfBM6rQli8oTlnHxP3G8kRv3kK1vDuOoaCtXsot0anPjYEpi2klvaaWaSuKZ9eqfm0gYDVGya1Q
+  require_chef_omnibus: latest
+  cloudstack_serviceoffering_id: d04b4fb7-e0c6-4acc-85da-56437b8b873a
+  cloudstack_zone_id: b7ee7151-b539-4c82-85d9-841c8c2b405d
+  cloudstack_security_group_id: 77876e01-44c8-11e4-ad1f-52540080ad25
+  cloudstack_ssh_keypair_name: jmoody_fifthecho
+
+provisioner:
+  name: ansible_playbook
+  hosts: all
+  require_ansible_repo: true
+
+platforms:
+  - name: Centos-7
+    driver:
+      cloudstack_template_id: 39155442-20ea-4fa5-a9f9-fa3b764ae2c7
+  - name: Centos-6
+    driver:
+      cloudstack_template_id: a90cfac1-bd06-4453-9e44-cd1202cb04c4
+  - name: Centos-5
+    driver:
+      cloudstack_template_id: 38d0fabb-124b-4bc4-b347-91d2c444d9ab
+
+  - name: Ubuntu-14
+    driver:
+      cloudstack_template_id: 9122b6aa-eaaa-48b2-80b9-b6bf16da385a
+  - name: Ubuntu-12
+    driver:
+      cloudstack_template_id: cda26ace-9e9a-4355-bdae-9961838d36ff
+  - name: Ubuntu-10
+    driver:
+      cloudstack_template_id: 2aa20494-aaee-4bc2-8e2f-be392f1efdfb
+
+  - name: Debian-7
+    driver:
+      cloudstack_template_id: 03a63e02-a3ee-4688-b749-581d6fcece91
+  - name: Debian-6
+    driver:
+      cloudstack_template_id: 293b9d8f-fb27-4aa0-9724-5bb3aca02704
+
+
+suites:
+  - name: lab

@@ -14,6 +14,8 @@
 
     - name: remove cloud user
       user: name=cloud state=absent
+    - name: set root password to "cloudstack" (in case init scripts fail)
+      user: name=root update_password=always password=$6$hIuIfYHMi8Vd$QCoX.nOo551xKqhIPjdc/aUhtSTpKf3kR0q5MjXrwOgP5Iu9G.MVojQZfvdK2hPqimnY16htsgLktuYhUehNQ0
 
     - name: add CloudStack login splash (Ubuntu)
       template: src=templates/motd.j2 dest=/etc/motd.tail
@@ -75,3 +77,5 @@
       shell: rm -f /root/.*history*
     - name: remove ssh keys
       shell: rm -f /etc/ssh/*host*key*
+    - name: remove authorized keys
+      file: path=/root/.ssh/authorized_keys state=absent

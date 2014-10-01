@@ -27,9 +27,16 @@ function find_lease() {
   RESTART_DHCLIENT=true
 
   if [ -e $LEASE_DIRECTORY/*-*$NIC* ]; then
-        LEASE_FILE=$(ls $LEASE_DIRECTORY*$NIC*)
-        logger -t "cloud" "DHCP file ($LEASE_FILE) exists. No need to restart dhclient."
-        RESTART_DHCLIENT=false
+    LEASE_FILE=$(ls $LEASE_DIRECTORY*$NIC*)
+    logger -t "cloud" "DHCP file ($LEASE_FILE) exists. No need to restart dhclient."
+    RESTART_DHCLIENT=false
+  fi
+
+  if [ $RESTART_DHCLIENT = false ]; then
+    LEASE_SIZE=$(wc -l $LEASE_FILE | awk {'print $1'})
+    if [ $LEASE_SIZE -eq 0 ]; then
+      RESTART_DHCLIENT=true
+    fi
   fi
 
   if [ $RESTART_DHCLIENT = true ]; then
@@ -41,7 +48,7 @@ function find_lease() {
             rm -f /var/run/dhc*
           done
     fi
-    $DHCLIENT -v -lf $LEASE_DIRECTORY/dhclient-$NIC.leases -pf /var/run/dhclient-$NIC.pid $NIC
+    $DHCLIENT -lf $LEASE_DIRECTORY/dhclient-$NIC.leases -pf /var/run/dhclient-$NIC.pid $NIC
     sleep 5
     find_lease
   fi

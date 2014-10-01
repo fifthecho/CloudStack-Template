@@ -1,6 +1,7 @@
 [Unit]
 Description=CloudStack Guest SSH Key Reset
 After=network.target local-fs.target
+Before=sshd.service
 
 [Service]
 Type=oneshot

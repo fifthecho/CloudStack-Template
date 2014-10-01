@@ -1,6 +1,7 @@
 [Unit]
 Description=CloudStack First Boot
 After=network.target
+Before=sshd.service
 
 [Service]
 Type=oneshot
