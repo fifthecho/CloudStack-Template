@@ -17,6 +17,7 @@ provisioner:
   hosts: all
   playbook: Template.yml
   require_ansible_repo: true
+  roles_path: roles
 
 platforms:
   - name: Centos-7
