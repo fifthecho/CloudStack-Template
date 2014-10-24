@@ -18,3 +18,8 @@
 - name: setup cloudstack-firstboot (systemd)
   when: upstart.stat.exists == false and systemd.stat.exists == true
   template: src=templates/firstboot.systemd.j2 dest=/usr/lib/systemd/system/cloudstack-firstboot.service mode=0644
+
+- name: clear init legacy
+  when: ansible_os_family == "RedHat"
+  shell: chkconfig --del cloudstack-firstboot
+  ignore_errors: true

@@ -10,6 +10,7 @@
 # Required-Stop:     $network $local_fs $remote_fs $syslog $all
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
+# X-Start-Before:    $sshd
 # Short-Description: Prepare new VM
 # Description:       Prepare new VM by flushing old information and preparing network environment
 ### END INIT INFO

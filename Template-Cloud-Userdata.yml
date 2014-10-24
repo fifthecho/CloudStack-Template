@@ -18,3 +18,8 @@
 - name: setup cloudstack-set-guest-password (systemd)
   when: upstart.stat.exists == false and systemd.stat.exists == true
   template: src=templates/run-userdata.systemd.j2 dest=/usr/lib/systemd/system/cloudstack-run-userdata.service mode=0644
+
+- name: clear init legacy
+  when: ansible_os_family == "RedHat"
+  shell: chkconfig --del cloudstack-run-userdata
+  ignore_errors: true

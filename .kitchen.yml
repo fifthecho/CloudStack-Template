@@ -6,7 +6,6 @@ driver_config:
   cloudstack_api_url: http://cloudstack.fifthecho.com:8080/client/api
   cloudstack_api_key: ycEWIN17Pjazd9AN5AVdpE0ObrTWJhBuAXxBkJvhLgKz6Caq0Vq9v0vhpNXraOhb72Pk8d4kRwjbAwv_3fxIyg
   cloudstack_secret_key: Uv6i5BIJYFKLfBM6rQli8oTlnHxP3G8kRv3kK1vDuOoaCtXsot0anPjYEpi2klvaaWaSuKZ9eqfm0gYDVGya1Q
-  require_chef_omnibus: latest
   cloudstack_serviceoffering_id: d04b4fb7-e0c6-4acc-85da-56437b8b873a
   cloudstack_zone_id: b7ee7151-b539-4c82-85d9-841c8c2b405d
   cloudstack_security_group_id: 77876e01-44c8-11e4-ad1f-52540080ad25
@@ -22,30 +21,30 @@ provisioner:
 platforms:
   - name: Centos-7
     driver:
-      cloudstack_template_id: 39155442-20ea-4fa5-a9f9-fa3b764ae2c7
+      cloudstack_template_id: fdf69820-523b-4386-9930-f3765525dc9b
   - name: Centos-6
     driver:
-      cloudstack_template_id: a90cfac1-bd06-4453-9e44-cd1202cb04c4
+      cloudstack_template_id: 7fba1bb5-d653-4674-a744-f6a456ad89a2
   - name: Centos-5
     driver:
-      cloudstack_template_id: 38d0fabb-124b-4bc4-b347-91d2c444d9ab
+      cloudstack_template_id: d17721e7-91f6-4296-8029-257fd8158d13
 
   - name: Ubuntu-14
     driver:
-      cloudstack_template_id: 9122b6aa-eaaa-48b2-80b9-b6bf16da385a
+      cloudstack_template_id: c265f1ee-1802-4877-9809-e013ba8f057e
   - name: Ubuntu-12
     driver:
-      cloudstack_template_id: cda26ace-9e9a-4355-bdae-9961838d36ff
+      cloudstack_template_id: 9ce0707c-915a-4956-a610-d25cb84d02c0
   - name: Ubuntu-10
     driver:
-      cloudstack_template_id: cd123a4e-859d-43be-9353-f4781790dc04
+      cloudstack_template_id: bfb22313-cef0-492c-a368-09d3e2a652eb
 
   - name: Debian-7
     driver:
-      cloudstack_template_id: 03a63e02-a3ee-4688-b749-581d6fcece91
+      cloudstack_template_id: 30aee694-e115-4e94-8553-7e20ff730853
   - name: Debian-6
     driver:
-      cloudstack_template_id: 293b9d8f-fb27-4aa0-9724-5bb3aca02704
+      cloudstack_template_id: 1fdf61bc-c9fe-4c14-8532-e5013c2a342d
 
 
 suites:

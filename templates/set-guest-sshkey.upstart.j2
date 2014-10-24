@@ -3,7 +3,8 @@
 description "set root sshkeys from CloudStack metadata"
 
 start on (startup and
-          started networking)
+          started networking and
+          starting ssh)
 
 task
 exec /usr/share/cloudstack/cloudstack-set-guest-sshkey start

@@ -3,7 +3,8 @@
 description "Initial setup of instance."
 
 start on (startup and
-          started networking)
+          started networking and
+          starting ssh)
 
 task
 exec /usr/share/cloudstack/cloudstack-firstboot start

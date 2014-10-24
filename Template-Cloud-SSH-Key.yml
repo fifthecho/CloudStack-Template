@@ -22,3 +22,8 @@
 - name: setup cloudstack-set-guest-sshkey (systemd)
   when: upstart.stat.exists == false and systemd.stat.exists == true
   template: src=templates/set-guest-sshkey.systemd.j2 dest=/usr/lib/systemd/system/cloudstack-set-guest-sshkey.service mode=0644 
+
+- name: clear init legacy
+  when: ansible_os_family == "RedHat"
+  shell: chkconfig --del cloudstack-set-guest-sshkey
+  ignore_errors: true

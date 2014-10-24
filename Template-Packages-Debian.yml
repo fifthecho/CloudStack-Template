@@ -22,6 +22,11 @@
     - sudo
     - git
     - rsyslog
+    - rsync
+    - netcat
+    - nmap
+    - strace
+    - dnsutils
 - name: update system (Debian)
   when: ansible_os_family == "Debian"
   apt: upgrade=dist update_cache=yes
