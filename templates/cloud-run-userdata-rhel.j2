@@ -40,7 +40,7 @@ then
 fi
 
 
-USER_DATA_SERVER_IP=$(grep dhcp-server-identifier $LEASE_FILE | tail -1 | awk '{print $NF}' | tr -d '\;')
+USER_DATA_SERVER_IP=$(grep dhcp-server-identifier $LEASE_FILE | uniq | tail -1 | awk '{print $NF}' | tr -d '\;')
 if [ -n $USER_DATA_SERVER_IP ]
 then
   logger -t "cloud" "Sending request to USER-DATA server at $USER_DATA_SERVER_IP"
