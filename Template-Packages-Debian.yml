@@ -27,6 +27,7 @@
     - nmap
     - strace
     - dnsutils
+    - iotop
 - name: update system (Debian)
   when: ansible_os_family == "Debian"
   apt: upgrade=dist update_cache=yes

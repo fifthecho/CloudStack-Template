@@ -17,4 +17,3 @@
 
 #Ubuntu12-Xen ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.0.102 ansible_ssh_port=2225
 
-RHEL6-Nike ansible_ssh_user=root ansible_ssh_pass=xM3dbzgdy ansible_ssh_host=66.70.51.135 ansible_ssh_port=5309

@@ -47,3 +47,7 @@
     - /var/log/messages
     - /var/log/syslog
     - /var/log/lastlog
+
+- name: clean yum cache
+  when: ansible_os_family == "RedHat"
+  shell: yum clean all
