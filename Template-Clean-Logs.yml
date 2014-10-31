@@ -30,7 +30,7 @@
     - /var/log/yum.log
     - /var/spool/mail/root
 - name: clean really old logs
-  shell: rm -f {{ item }}
+  shell: rm -Rf {{ item }}
   with_items:
     - /var/log/*old
     - /var/log/*0
@@ -39,6 +39,8 @@
     - /var/log/dmesg*
     - /var/log/*-201*
     - /var/log/*gz
+    - /root/*
+    - /home/*
   ignore_errors: true
 
 - name: recreate required logs
