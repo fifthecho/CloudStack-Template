@@ -2,7 +2,7 @@
 function find_lease() {
 
   # Determine primary network adapter name
-  NIC=`ip link | grep UP | grep -v LOOPBACK | awk -F':' '{print $2}' | tr -d ' '`
+  NIC=`ip link | grep state\ UP | grep -v LOOPBACK | awk -F':' '{print $2}' | tr -d ' '`
 
   # Add your DHCP lease folders here
   if [ -f /etc/debian_version ]; then
