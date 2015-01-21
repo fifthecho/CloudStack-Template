@@ -25,9 +25,9 @@ function find_lease() {
   DHCLIENT=$(which dhclient)
   RESTART_DHCLIENT=true
 
-  RUNNING_NETWORKMANAGER=$(ps aux | grep -v grep | grep sbin\/NetworkManager )
+  RUNNING_NETWORKMANAGER=$(ps aux | grep -v grep | grep sbin\/NetworkManager | wc -l)
 
-  if [ -z $RUNNING_NETWORKMANAGER ]; then
+  if [[ -z $RUNNING_NETWORKMANAGER || $RUNNING_NETWORKMANAGER -eq 0 ]]; then
     if [ -e $LEASE_DIRECTORY/*-*$NIC* ]; then
       LEASE_FILE=$(ls $LEASE_DIRECTORY*$NIC*)
       logger -t "cloud" "DHCP file ($LEASE_FILE) exists. No need to restart dhclient."
@@ -56,7 +56,7 @@ function find_lease() {
     fi
   fi
 
-  if [ $RUNNING_NETWORKMANAGER ]; then
+  if [[ -n $RUNNING_NETWORKMANAGER && $RUNNING_NETWORKMANAGER -ge 1 ]] ; then
     LEASE_FILE=$( ps -eo args | grep -v grep | grep dhclient | sed -e 's/\s\+/\n/g' | grep lease)
 
   fi
