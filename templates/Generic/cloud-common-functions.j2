@@ -7,7 +7,6 @@ function find_lease() {
   # Add your DHCP lease folders here
   if [ -f /etc/debian_version ]; then
     # Ubuntu
-    #DHCP_FOLDERS="/var/lib/dhcpcd/dhcpcd-eth0.*"
     DHCP_FOLDERS="/var/lib/dhclient/ /var/lib/dhcp3/ /var/lib/dhcp/"
   elif [ -f /etc/redhat-release ]; then
     # Redhat / CentOS / Scientific Linux
