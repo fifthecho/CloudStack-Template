@@ -25,31 +25,40 @@ function find_lease() {
   DHCLIENT=$(which dhclient)
   RESTART_DHCLIENT=true
 
-  if [ -e $LEASE_DIRECTORY/*-*$NIC* ]; then
-    LEASE_FILE=$(ls $LEASE_DIRECTORY*$NIC*)
-    logger -t "cloud" "DHCP file ($LEASE_FILE) exists. No need to restart dhclient."
-    RESTART_DHCLIENT=false
-  fi
+  RUNNING_NETWORKMANAGER=$(ps aux | grep -v grep | grep sbin\/NetworkManager | wc -l)
 
-  if [ $RESTART_DHCLIENT = false ]; then
-    LEASE_SIZE=$(wc -l $LEASE_FILE | awk {'print $1'})
-    if [ $LEASE_SIZE -eq 0 ]; then
-      RESTART_DHCLIENT=true
+  if [[ -z $RUNNING_NETWORKMANAGER || $RUNNING_NETWORKMANAGER -eq 0 ]]; then
+    if [ -e $LEASE_DIRECTORY/*-*$NIC* ]; then
+      LEASE_FILE=$(ls $LEASE_DIRECTORY*$NIC*)
+      logger -t "cloud" "DHCP file ($LEASE_FILE) exists. No need to restart dhclient."
+      RESTART_DHCLIENT=false
+    fi
+
+    if [ $RESTART_DHCLIENT = false ]; then
+      LEASE_SIZE=$(wc -l $LEASE_FILE | awk {'print $1'})
+      if [ $LEASE_SIZE -eq 0 ]; then
+        RESTART_DHCLIENT=true
+      fi
+    fi
+
+    if [ $RESTART_DHCLIENT = true ]; then
+      logger -t "cloud" "DHCP file does not exist. Restarting dhclient."
+      DHCLIENT_PID=$(ps ax | grep dhclient | grep -v grep | uniq | awk {'print $1'})
+      if [ -n $DHCLIENT_PID ]; then
+            for CLIENTPID in $DHCLIENT_PID; do
+              kill $CLIENTPID
+              rm -f /var/run/dhc*
+            done
+      fi
+      $DHCLIENT -lf $LEASE_DIRECTORY/dhclient-$NIC.leases -pf /var/run/dhclient-$NIC.pid $NIC
+      sleep 5
+      find_lease
     fi
   fi
 
-  if [ $RESTART_DHCLIENT = true ]; then
-    logger -t "cloud" "DHCP file does not exist. Restarting dhclient."
-    DHCLIENT_PID=$(ps ax | grep dhclient | grep -v grep | uniq | awk {'print $1'})
-    if [ -n $DHCLIENT_PID ]; then
-          for CLIENTPID in $DHCLIENT_PID; do
-            kill $CLIENTPID
-            rm -f /var/run/dhc*
-          done
-    fi
-    $DHCLIENT -lf $LEASE_DIRECTORY/dhclient-$NIC.leases -pf /var/run/dhclient-$NIC.pid $NIC
-    sleep 5
-    find_lease
+  if [[ -n $RUNNING_NETWORKMANAGER && $RUNNING_NETWORKMANAGER -ge 1 ]] ; then
+    LEASE_FILE=$( ps -eo args | grep -v grep | grep dhclient | sed -e 's/\s\+/\n/g' | grep lease)
+
   fi
 
   echo "Using DHCP lease from $LEASE_FILE"
