@@ -1,0 +1,73 @@
+#!/bin/bash 
+#
+# Init file for RHN SystemID Client
+#
+# chkconfig: 2345 98 02
+# description: RHN SystemID Client
+### BEGIN INIT INFO
+# Provides:          cloud-set-rhn-systemid
+# Required-Start:    $sshd $network
+# Required-Stop:     $sshd $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Sets rhn systemid
+# Description:       Sets the rhn systemid in cloud.datapipe.com
+### END INIT INFO
+
+
+# Add your DHCP lease folders here
+DHCP_FOLDERS="/var/lib/dhclient/* /var/lib/dhcp3/* /var/lib/dhcp/* /var/lib/NetworkManager/*"
+SYSTEM_ID_FILE="/etc/sysconfig/rhn/systemid"
+CCP_URL="https://cloud.datapipe.com/api/instance/license"
+data_received=0
+DIST=$(lsb_release -i | sed 's/\t//g' |awk -F':' '{print $2}')
+RELEASE=$(lsb_release -r | sed 's/\t//g' |awk -F':' '{print $2}')
+
+# Check for RHEL7 -- it uses a different registrsation method and does not keep info in a file.
+if [[ "$DIST" == RedHat* ]]  &&  [[ "$RELEASE" == 7.* ]]; then
+	system_id=$(subscription-manager identity |grep 'system identity:' |awk '{print $NF}')
+elif [ -f $SYSTEM_ID_FILE ]; then
+	system_id=$(grep -A 1 '<name>system_id</name>' /etc/sysconfig/rhn/systemid | sed -n '/string/{s/.*<string>//;s/<\/string.*//;p;}' | sed 's/ID-//')
+else
+	logger -t "cloud" "Could not find system id file: $SYSTEM_ID_FILE"
+	exit 1
+fi
+
+for DHCP_FILE in $DHCP_FOLDERS
+do
+	if [ -f $DHCP_FILE ]
+	then
+		file_count=$((file_count+1))
+		DHCP_SERVER_IP=$(grep dhcp-server-identifier $DHCP_FILE | tail -1 | awk '{print $NF}' | tr -d '\;')
+
+		if [ -n $DHCP_SERVER_IP ]
+		then
+			logger -t "cloud" "Sending request to dhcp server at $DHCP_SERVER_IP"
+
+			instance_id=$(wget -t 3 -T 20 -O - http://$DHCP_SERVER_IP/latest/instance-id 2>/dev/null)
+			region_name=$(wget -t 3 -T 20 -O - http://$DHCP_SERVER_IP/latest/availability-zone 2>/dev/null)
+
+			if [ $? -eq 0 ]
+			then
+				logger -t "cloud" "Got response from server at $DHCP_SERVER_IP"
+				data_received=1
+				break
+			fi
+		else
+			logger -t "cloud" "Could not find dhcp server IP in $DHCP_FILE"
+		fi
+	fi
+done
+
+# did we find the keys anywhere?
+if [ "$data_received" == "0" ]
+then
+    logger -t "cloud" "Failed to get metadata from any server"
+    exit 1
+fi
+response=$(curl -m 60 -d "instance_id=$instance_id&region_name=$region_name&license_key=$system_id&license_name=RHEL" $CCP_URL)
+ret_val=$?
+logger -t "cloud" "Got response from $CCP_URL: $response" 
+exit $ret_val
+
+
