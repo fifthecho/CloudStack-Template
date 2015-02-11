@@ -7,6 +7,7 @@ These plays have been tested and work against:
 * Red Hat Enterprise Linux (and derivatives [Scientific/Centos/Oracle])
   * 5
   * 6
+  * 7
 * Debian Linux
   * 6
   * 7
