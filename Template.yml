@@ -18,10 +18,10 @@
       user: name=root update_password=always password=$6$hIuIfYHMi8Vd$QCoX.nOo551xKqhIPjdc/aUhtSTpKf3kR0q5MjXrwOgP5Iu9G.MVojQZfvdK2hPqimnY16htsgLktuYhUehNQ0
 
     - name: add CloudStack login splash (Ubuntu)
-      template: src=templates/motd.j2 dest=/etc/motd.tail
+      template: src=templates/Generic/motd.j2 dest=/etc/motd.tail
       when: ansible_distribution == "Ubuntu"
     - name: add CloudStack login spash (Others)
-      template: src=templates/motd.j2 dest=/etc/motd
+      template: src=templates/Generic/motd.j2 dest=/etc/motd
       when: ansible_distribution != "Ubuntu"
     - name: create ssh directory
       file: state=directory mode=0700 path=/root/.ssh

@@ -5,7 +5,7 @@
 
 - name: setup networking (RHEL)
   when: ansible_os_family == "RedHat"
-  template: src=templates/ifcfg-rhel.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{adapter_name.stdout}} mode=0644
+  template: src=templates/RHEL/ifcfg-rhel.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{adapter_name.stdout}} mode=0644
 
 - name: remove udev network naming (RHEL)
   when: ansible_os_family == "RedHat"
@@ -13,4 +13,4 @@
 
 - name: setup networking (Debian)
   when: ansible_os_family == "Debian"
-  template: src=templates/ifcfg-debian.j2 dest=/etc/network/interfaces mode=0644
+  template: src=templates/Debian/ifcfg-debian.j2 dest=/etc/network/interfaces mode=0644
