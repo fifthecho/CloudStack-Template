@@ -57,7 +57,7 @@ function find_lease() {
   fi
 
   if [[ -n $RUNNING_NETWORKMANAGER && $RUNNING_NETWORKMANAGER -ge 1 ]] ; then
-    LEASE_FILE=$( ps -eo args | grep -v grep | grep dhclient | sed -e 's/\s\+/\n/g' | grep lease)
+    LEASE_FILE=$( ps -eo args | grep -v grep | grep dhclient | sed -e 's/\s\+/\n/g' | grep lease | uniq)
 
   fi
 
