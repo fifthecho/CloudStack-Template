@@ -7,5 +7,10 @@
   stat: path=/lib/init/upstart-job get_md5=no
   register: upstart
 
+- name: test for FreeBSD
+  when: ansible_os_family == "FreeBSD"
+  stat: path=/etc/rc.conf get_md5=no
+  register: freebsd
+
 #- debug: var=systemd
 #- debug: var=systemd

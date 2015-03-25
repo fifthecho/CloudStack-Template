@@ -44,8 +44,7 @@ start_daemon () {
   echo "Setting up /etc/hosts for IP address $IP" 
   logger -t "Setup" "Setting up /etc/hosts for IP address $IP"
 
-  /usr/sbin/dpkg-reconfigure --force openssh-server
-  /usr/sbin/service ssh restart
+  test -f /etc/ssh/ssh_host_dsa_key || dpkg-reconfigure openssh-server
 
   /usr/sbin/update-rc.d cloudstack-firstboot disable
   /usr/sbin/update-rc.d cloudstack-firstboot remove

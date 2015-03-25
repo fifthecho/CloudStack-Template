@@ -37,3 +37,6 @@
 - name: set selinux to permissive
   when: ansible_os_family == "RedHat"
   selinux: policy=targeted state=permissive
+- name: set timezone to UTC (RHEL)
+  when: ansible_os_family == "RedHat"
+  shell: "rm -f /etc/localtime && ln -s /usr/share/zoneinfo/UTC /etc/localtime"

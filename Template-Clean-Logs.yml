@@ -34,6 +34,11 @@
   with_items:
     - /var/log/*old
     - /var/log/*0
+    - /var/log/*.?
+    - /var/log/user.log.?
+    - /var/log/kern.log.?
+    - /var/log/auth.log.?
+    - /var/log/daemon.log.?
     - /var/log/upstart/*
     - /var/log/sa/*
     - /var/log/dmesg*

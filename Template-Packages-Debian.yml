@@ -28,6 +28,18 @@
     - strace
     - dnsutils
     - iotop
+- name: install latest hwe for Ubuntu 12.04
+  apt: name={{ item }} state=latest update_cache=yes
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int == 12
+  with_items:
+    - linux-generic-lts-trusty
+    - linux-image-generic-lts-trusty
 - name: update system (Debian)
   when: ansible_os_family == "Debian"
   apt: upgrade=dist update_cache=yes
+- name: set timezone to UTC (Debian)
+  when: ansible_os_family == "Debian"
+  shell: "echo 'Etc/UTC' > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata"
+- name: cleanup old packages (Debian)
+  when: ansible_os_family == "Debian"
+  shell: "apt-get autoremove -y"

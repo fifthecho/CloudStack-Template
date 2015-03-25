@@ -1,0 +1,20 @@
+---
+- name: install "core" packages (FreeBSD)
+  when: ansible_os_family == "FreeBSD"
+  pkgng: name={{ item }} state=present
+  with_items:
+    - vim
+    - screen
+    - tmux
+    - curl
+    - wget
+    - lynx
+    - links
+    - sudo
+    - bash
+    - git
+    - rsyslog
+    - rsync
+    - nmap
+    - netcat
+    - bind-tools

@@ -11,9 +11,12 @@ function find_lease() {
   elif [ -f /etc/redhat-release ]; then
     # Redhat / CentOS / Scientific Linux
     DHCP_FOLDERS="/var/lib/dhclient/ /var/lib/dhcp3/"
+  elif [ -f /etc/freebsd-update.conf ]; then
+    DHCP_FOLDERS="/var/db/"
   else
     # Others
     DHCP_FOLDERS="/var/lib/dhclient/ /var/lib/dhcp3/"
+    FREEBSD=1
   fi
 
   for TEST_DIRECTORY in $DHCP_FOLDERS; do
