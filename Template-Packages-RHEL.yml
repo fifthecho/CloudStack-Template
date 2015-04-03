@@ -40,3 +40,6 @@
 - name: set timezone to UTC (RHEL)
   when: ansible_os_family == "RedHat"
   shell: "rm -f /etc/localtime && ln -s /usr/share/zoneinfo/UTC /etc/localtime"
+- name: install vmware tools (RHEL/vmware)
+  yum: name=open-vm-tools state=latest
+  when: ansible_os_family == "RedHat" and ansible_virtualization_type == "VMware"
