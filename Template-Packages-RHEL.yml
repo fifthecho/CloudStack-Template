@@ -31,6 +31,7 @@
     - strace
     - bind-utils
     - iotop
+    - htop
 - name: update system (RHEL)
   when: ansible_os_family == "RedHat"
   command: yum upgrade -y
