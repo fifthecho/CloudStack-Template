@@ -1,8 +1,12 @@
-#!/bin/bash
+#!env bash
 function find_lease() {
 
   # Determine primary network adapter name
-  NIC=`ip link | grep state\ UP | grep -v LOOPBACK | awk -F':' '{print $2}' | tr -d ' '`
+  if [ uname == "Linux" ]; then
+    NIC=`ip link | grep state\ UP | grep -v LOOPBACK | awk -F':' '{print $2}' | tr -d ' '`
+  elif [ uname == "FreeBSD" ]; then
+    NIC=`ifconfig | grep UP | grep -v LOOPBACK | awk -F':' '{print $1}' | tr -d ' '`
+  fi
 
   # Add your DHCP lease folders here
   if [ -f /etc/debian_version ]; then
@@ -16,7 +20,6 @@ function find_lease() {
   else
     # Others
     DHCP_FOLDERS="/var/lib/dhclient/ /var/lib/dhcp3/"
-    FREEBSD=1
   fi
 
   for TEST_DIRECTORY in $DHCP_FOLDERS; do
@@ -31,7 +34,7 @@ function find_lease() {
   RUNNING_NETWORKMANAGER=$(ps aux | grep -v grep | grep sbin\/NetworkManager | wc -l)
 
   if [[ -z $RUNNING_NETWORKMANAGER || $RUNNING_NETWORKMANAGER -eq 0 ]]; then
-    if [ -e $LEASE_DIRECTORY/*-*$NIC* ]; then
+    if [ -e $LEASE_DIRECTORY/*-*$NIC* ] || [ -e $LEASE_DIRECTORY/*.$NIC* ]; then
       LEASE_FILE=$(ls $LEASE_DIRECTORY*$NIC*)
       logger -t "cloud" "DHCP file ($LEASE_FILE) exists. No need to restart dhclient."
       RESTART_DHCLIENT=false

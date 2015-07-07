@@ -18,3 +18,12 @@
     - nmap
     - netcat
     - bind-tools
+- name: update system (FreeBSD) 1/3
+  when: ansible_os_family == "FreeBSD"
+  command: freebsd-update fetch
+- name: update system (FreeBSD) 2/3
+  when: ansible_os_family == "FreeBSD"
+  command: freebsd-update install
+- name: update system (FreeBSD) 3/3
+  when: ansible_os_family == "FreeBSD"
+  command: pkg upgrade -y
