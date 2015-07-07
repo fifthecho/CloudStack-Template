@@ -1,0 +1,21 @@
+centos5-kvm ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.23 ansible_ssh_port=22
+centos6-kvm ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.225
+centos7-kvm ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.138
+debian6-kvm ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.226
+debian7-kvm ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.246
+debian8-kvm ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.89
+ubuntu10-kvm ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.45
+ubuntu12-kvm ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.60
+ubuntu14-kvm ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.75
+freebsd10-kvm ansible_python_interpreter=/usr/local/bin/python ansible_connection=paramiko ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.139
+
+centos5-xen ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.81
+centos6-xen ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.199
+centos7-xen ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.79
+debian6-xen ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.4
+debian7-xen ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.147
+debian8-xen ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.51
+ubuntu10-xen ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.131
+ubuntu12-xen ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.175
+ubuntu14-xen ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.77
+freebsd10-xen ansible_python_interpreter=/usr/local/bin/python ansible_connection=paramiko ansible_ssh_user=root ansible_ssh_pass=cloudstack ansible_ssh_host=10.20.1.83
