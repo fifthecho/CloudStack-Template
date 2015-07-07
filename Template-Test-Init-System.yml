@@ -1,6 +1,6 @@
 ---
 - name: test for systemd
-  stat: path=/usr/lib/systemd/system get_md5=no
+  stat: path=/etc/systemd/system get_md5=no
   register: systemd
 
 - name: test for upstart
