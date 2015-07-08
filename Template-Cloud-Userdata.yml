@@ -9,7 +9,7 @@
 
 - name: add cloud-run-userdata script (FreeBSD)
   when: ansible_os_family == "FreeBSD"
-  template: src=templates/FreeBSD/cloud-run-userdata-freebsd.j2 dest=/usr/share/cloudstack/cloudstack-run-userdata mode=0755
+  template: src=templates/FreeBSD/cloud-run-userdata-freebsd.j2 dest=/usr/share/cloudstack/cloudstack_run_userdata mode=0755
 
 - name: setup cloudstack-run-userdata (init)
   when: upstart.stat.exists == false and systemd.stat.exists == false and ansible_os_family != "FreeBSD"
@@ -25,7 +25,7 @@
 
 - name: setup cloudstack-run-userdata (FreeBSD)
   when: upstart.stat.exists == false and systemd.stat.exists == false and ansible_os_family == "FreeBSD"
-  template: src=templates/FreeBSD/cloud-userdata-rc.j2 dest=/usr/local/etc/rc.d/cloudstack-run-userdata mode=0755
+  template: src=templates/FreeBSD/cloud-userdata-rc.j2 dest=/usr/local/etc/rc.d/cloudstack_run_userdata mode=0755
 
 - name: clear init legacy
   when: ansible_os_family == "RedHat"

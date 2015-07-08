@@ -29,6 +29,10 @@
     - /var/log/wtmp
     - /var/log/yum.log
     - /var/spool/mail/root
+    - /root/*
+    - /home/*
+    - /root/.history
+    - /root/.bash_history
 - name: clean really old logs
   shell: rm -Rf {{ item }}
   with_items:
@@ -44,9 +48,7 @@
     - /var/log/dmesg*
     - /var/log/*-201*
     - /var/log/*gz
-    - /var/log/*bz2
-    - /root/*
-    - /home/*
+    - /var/log/*bz?
   ignore_errors: true
 
 - name: recreate required logs

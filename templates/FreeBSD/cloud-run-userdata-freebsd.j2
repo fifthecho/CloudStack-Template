@@ -1,18 +1,4 @@
 #!/usr/local/bin/bash
-#
-# Init file for User-Data download and execution
-#
-# chkconfig: 345 99 02
-# description: User-Data Download Client
-### BEGIN INIT INFO
-# Provides:          cloud-userdata
-# Required-Start:    $network $local_fs $remote_fs $syslog $all
-# Required-Stop:     $network $local_fs $remote_fs $syslog $all
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: Download and run Cloud userdata
-# Description:       Downloads and executes any userdata specified when initializing the virtual machine.
-### END INIT INFO
 
 # Modify this line to specify the user (default is root)
 user=root

@@ -1,12 +1,12 @@
 #!/bin/sh
-# PROVIDE: cloudstack-firstboot
+# PROVIDE: cloudstack_firstboot
 # REQUIRE: DAEMON networking
 # BEFORE:  LOGIN
 # KEYWORD: nojail
 
 . /etc/rc.subr
 
-name=cloudstack-firstboot
+name=cloudstack_firstboot
 rcvar=cloudstack_firstboot_enable
 
 command="/usr/share/cloudstack/${name}"

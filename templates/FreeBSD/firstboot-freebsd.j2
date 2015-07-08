@@ -39,4 +39,6 @@ echo "$IP      $HOST_NAME" >> /etc/hosts
 cat rc.conf | sed '/^cloud_firstboot/d' > /etc/rc.conf
 cat rc.conf | sed '/^linux/d' > /etc/rc.conf
 echo "linux_enable=\"YES\"" >> /etc/rc.conf
-kldload linux
+if [ $(kldstat | grep linux | wc -l) -eq 0 ]; then
+  kldload linux
+fi

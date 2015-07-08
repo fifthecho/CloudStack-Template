@@ -1,12 +1,12 @@
 #!/bin/sh
-# PROVIDE: cloudstack-set-guest-sshkey
+# PROVIDE: cloudstack_set_guest_sshkey
 # REQUIRE: DAEMON networking
 # BEFORE:  LOGIN
 # KEYWORD: nojail
 
 . /etc/rc.subr
 
-name=cloudstack-set-guest-sshkey
+name=cloudstack_set_guest_sshkey
 rcvar=cloudstack_set_guest_sshkey_enable
 
 command="/usr/share/cloudstack/${name}"

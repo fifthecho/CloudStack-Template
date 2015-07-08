@@ -1,12 +1,12 @@
 #!/bin/sh
-# PROVIDE: cloudstack-run-userdata
+# PROVIDE: cloudstack_run_userdata
 # REQUIRE: DAEMON networking
 # BEFORE:  LOGIN
 # KEYWORD: nojail
 
 . /etc/rc.subr
 
-name=cloudstack-run-userdata
+name=cloudstack_run_userdata
 rcvar=cloudstack_run_userdata_enable
 
 command="/usr/share/cloudstack/${name}"
