@@ -44,6 +44,7 @@
     - /var/log/dmesg*
     - /var/log/*-201*
     - /var/log/*gz
+    - /var/log/*bz2
     - /root/*
     - /home/*
   ignore_errors: true
