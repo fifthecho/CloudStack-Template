@@ -1,0 +1,11 @@
+#!/bin/sh
+
+. /etc/rc.subr
+
+name=cloudstack-firstboot
+rcvar=cloudstack_firstboot_enable
+
+command="/usr/share/cloudstack/${name}"
+
+load_rc_config $name
+run_rc_command "$1"

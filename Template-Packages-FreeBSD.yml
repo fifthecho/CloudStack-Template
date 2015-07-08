@@ -19,6 +19,10 @@
     - netcat
     - bind-tools
     - htop
+    - linux_base-c6
 - name: update packages (FreeBSD)
   when: ansible_os_family == "FreeBSD"
   command: pkg upgrade -y
+- name: enable linux compat
+  when: ansible_os_family == "FreeBSD"
+  service: name=linux enabled=yes

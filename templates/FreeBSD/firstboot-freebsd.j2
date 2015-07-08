@@ -1,0 +1,39 @@
+#!/usr/local/bin/bash
+#
+# Flush all things not needed for a new VM and create default network environment
+#
+
+. /usr/share/cloudstack/cloudstack-common-functions
+
+echo "Initializing Virtual Machine..."
+logger -t "Setup" "Initializing Virtual Machine..."
+find_lease
+
+cat rc.conf | sed '/^hostname/d' > /etc/rc.conf
+HOST_NAME=`grep host-name $LEASE_FILE | awk '{print $NF}' | tr -d '\;' | tr -d '"' | uniq`
+echo "Setting hostname to $HOST_NAME" 
+logger -t "Setup" "Setting hostname to $HOST_NAME"
+echo "hostname=\"$HOST_NAME\"" >> /etc/rc.conf
+/bin/hostname $HOST_NAME
+
+echo "# $FreeBSD: releng/10.1/etc/hosts 109997 2003-01-28 21:29:23Z dbaker $" > /etc/hosts
+echo "#" >> /etc/hosts
+echo "# Host Database" >> /etc/hosts
+echo "#" >> /etc/hosts
+echo "# This file should contain the addresses and aliases for local hosts that" >> /etc/hosts
+echo "# share this file.  Replace 'my.domain' below with the domainname of your" >> /etc/hosts
+echo "# machine." >> /etc/hosts
+echo "#" >> /etc/hosts
+echo "# In the presence of the domain name service or NIS, this file may" >> /etc/hosts
+echo "# not be consulted at all; see /etc/nsswitch.conf for the resolution order." >> /etc/hosts
+echo "#" >> /etc/hosts
+echo "#" >> /etc/hosts
+echo "::1                     localhost localhost.my.domain" >> /etc/hosts
+echo "127.0.0.1               localhost localhost.my.domain" >> /etc/hosts
+
+IP=`grep fixed-address $LEASE_FILE | awk '{print $NF}' | tr -d '\;' | uniq`
+echo "Setting up /etc/hosts for IP address $IP" 
+logger -t "Setup" "Setting up /etc/hosts for IP address $IP"
+echo "$IP      $HOST_NAME" >> /etc/hosts
+
+cat rc.conf | sed '/^cloud_firstboot/d' > /etc/rc.conf
