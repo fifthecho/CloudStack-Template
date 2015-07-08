@@ -27,6 +27,10 @@
   when: upstart.stat.exists == false and systemd.stat.exists == true and ansible_os_family != "FreeBSD"
   template: src=templates/systemd/set-guest-sshkey.systemd.j2 dest=/usr/lib/systemd/system/cloudstack-set-guest-sshkey.service mode=0644 
 
+- name: setup cloudstack-set-guest-sshkey (FreeBSD)
+  when: upstart.stat.exists == false and systemd.stat.exists == false and ansible_os_family == "FreeBSD"
+  template: src=templates/FreeBSD/cloud-sshkey-rc.j2 dest=/usr/local/etc/rc.d/cloudstack-set-guest-sshkey mode=0755
+
 - name: clear init legacy
   when: ansible_os_family == "RedHat"
   shell: chkconfig --del cloudstack-set-guest-sshkey

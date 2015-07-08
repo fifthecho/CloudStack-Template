@@ -1,0 +1,11 @@
+#!/bin/sh
+
+. /etc/rc.subr
+
+name=cloudstack-run-userdata
+rcvar=cloudstack_run_userdata_enable
+
+command="/usr/share/cloudstack/${name}"
+
+load_rc_config $name
+run_rc_command "$1"
