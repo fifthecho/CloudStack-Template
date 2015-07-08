@@ -1,4 +1,4 @@
-#!env bash
+#!/usr/local/bin/bash
 #
 # Init file for SSH Public Keys Download Client for FreeBSD
 #
@@ -14,7 +14,7 @@ keys_received=0
 file_count=0
 
 . /usr/share/cloudstack/cloudstack-common-functions
-find_lease()
+find_lease
 
 SSHKEY_SERVER_IP=$(grep dhcp-server-identifier $LEASE_FILE | uniq | tail -1 | awk '{print $NF}' | tr -d '\;')
 

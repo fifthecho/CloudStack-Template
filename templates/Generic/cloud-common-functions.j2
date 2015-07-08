@@ -2,20 +2,21 @@
 function find_lease() {
 
   # Determine primary network adapter name
-  if [ uname == "Linux" ]; then
+  if [ $(uname) == "Linux" ]; then
     NIC=`ip link | grep state\ UP | grep -v LOOPBACK | awk -F':' '{print $2}' | tr -d ' '`
-  elif [ uname == "FreeBSD" ]; then
+  elif [ $(uname) == "FreeBSD" ]; then
     NIC=`ifconfig | grep UP | grep -v LOOPBACK | awk -F':' '{print $1}' | tr -d ' '`
   fi
 
   # Add your DHCP lease folders here
   if [ -f /etc/debian_version ]; then
-    # Ubuntu
+    # Ubuntu / Debian
     DHCP_FOLDERS="/var/lib/dhclient/ /var/lib/dhcp3/ /var/lib/dhcp/"
   elif [ -f /etc/redhat-release ]; then
     # Redhat / CentOS / Scientific Linux
     DHCP_FOLDERS="/var/lib/dhclient/ /var/lib/dhcp3/"
   elif [ -f /etc/freebsd-update.conf ]; then
+    # FreeBSD
     DHCP_FOLDERS="/var/db/"
   else
     # Others
@@ -67,6 +68,7 @@ function find_lease() {
 
   fi
 
-  echo "Using DHCP lease from $LEASE_FILE"
+  # echo "Using DHCP lease from $LEASE_FILE"
   logger -t "cloud" "Using DHCP lease from $LEASE_FILE"
+  export LEASE_FILE
 }

@@ -11,16 +11,20 @@
   when: ansible_distribution == "Ubuntu"
   template: src=templates/Ubuntu/cloud-set-guest-sshkey-ubuntu.j2 dest=/usr/share/cloudstack/cloudstack-set-guest-sshkey mode=0755
 
+- name: add cloud-set-guest-sshkey script (FreeBSD)
+  when: ansible_os_family == "FreeBSD"
+  template: src=templates/FreeBSD/cloud-set-guest-sshkey-freebsd.j2 dest=/usr/share/cloudstack/cloudstack-set-guest-sshkey mode=0755
+
 - name: setup cloudstack-set-guest-sshkey (init)
-  when: upstart.stat.exists == false and systemd.stat.exists == false
+  when: upstart.stat.exists == false and systemd.stat.exists == false and ansible_os_family != "FreeBSD"
   file: state=link src=/usr/share/cloudstack/cloudstack-set-guest-sshkey dest=/etc/init.d/cloudstack-set-guest-sshkey mode=0755 force=yes
 
 - name: setup cloudstack-set-guest-sshkey (upstart)
-  when: upstart.stat.exists == true and systemd.stat.exists == false
+  when: upstart.stat.exists == true and systemd.stat.exists == false and ansible_os_family != "FreeBSD"
   template: src=templates/upstart/set-guest-sshkey.upstart.j2 dest=/etc/init/cloudstack-set-guest-sshkey.conf mode=0644
 
 - name: setup cloudstack-set-guest-sshkey (systemd)
-  when: upstart.stat.exists == false and systemd.stat.exists == true
+  when: upstart.stat.exists == false and systemd.stat.exists == true and ansible_os_family != "FreeBSD"
   template: src=templates/systemd/set-guest-sshkey.systemd.j2 dest=/usr/lib/systemd/system/cloudstack-set-guest-sshkey.service mode=0644 
 
 - name: clear init legacy

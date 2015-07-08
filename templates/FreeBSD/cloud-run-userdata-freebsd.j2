@@ -1,0 +1,98 @@
+#!/usr/local/bin/bash
+#
+# Init file for User-Data download and execution
+#
+# chkconfig: 345 99 02
+# description: User-Data Download Client
+### BEGIN INIT INFO
+# Provides:          cloud-userdata
+# Required-Start:    $network $local_fs $remote_fs $syslog $all
+# Required-Stop:     $network $local_fs $remote_fs $syslog $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Download and run Cloud userdata
+# Description:       Downloads and executes any userdata specified when initializing the virtual machine.
+### END INIT INFO
+
+# Modify this line to specify the user (default is root)
+user=root
+
+. /usr/share/cloudstack/cloudstack-common-functions
+sleep $[ 1 + $[ RANDOM % 10 ]]
+find_lease
+
+HOSTNAME=`grep host-name $LEASE_FILE | uniq | awk '{print $NF}' | tr -d '\;' | tr -d '"' | uniq`
+CLOUD_DIR=/var/lib/cloud/instances/$HOSTNAME
+USER_DATA=/var/lib/cloud/instances/$HOSTNAME/user-data
+LOCK=/var/lib/cloud/user-data.ran
+user_data_received=0
+file_count=0
+
+if [ -f $LOCK ]
+then
+  logger -t "cloud" "User-Data appears to be executed once, skipping"
+  exit 0
+fi
+
+if [ ! -d $CLOUD_DIR ]
+then
+  mkdir -p $CLOUD_DIR
+fi
+
+
+USER_DATA_SERVER_IP=$(grep dhcp-server-identifier $LEASE_FILE | uniq | tail -1 | awk '{print $NF}' | tr -d '\;')
+if [ -n $USER_DATA_SERVER_IP ]
+then
+  logger -t "cloud" "Sending request to USER-DATA server at $USER_DATA_SERVER_IP"
+  wget -t 3 -T 20 -O $USER_DATA http://$USER_DATA_SERVER_IP/latest/user-data 2>/dev/null
+  if [ $? -eq 0 ]
+  then
+    logger -t "cloud" "Got user-data from server at $USER_DATA_SERVER_IP"
+    if [ -s $USER_DATA ]; then
+      chmod 600 $USER_DATA
+      user_data_received=1
+    else
+      logger -t "cloud" "User-data is empty"
+    fi
+  fi
+  else
+    logger -t "cloud" "Could not find user-data server IP in $LEASE_FILE"
+  fi
+
+# did we get the user-data?
+if [ "$user_data_received" == "0" ]
+then
+  logger -t "cloud" "Failed to get user-data from any server"
+  exit 1
+fi
+ 
+# test/execute user-data
+if [ "$user_data_received" == "1" ]
+then
+  line1=`head -1 $USER_DATA`
+  echo $line1 | grep -q ^#!
+  if [ $? -eq 0 ]; then
+    if [ -f $LOCK ]
+    then
+      logger -t "cloud" "User-Data appears to be executed once, skipping"
+      exit 0
+    else
+      grep -r $'\r' $USER_DATA
+      if [ $? -ne 0 ]; then
+        chmod 700 $USER_DATA
+        $USER_DATA
+      else
+        sed -i -e 's/\r//g' $USER_DATA
+        chmod 700 $USER_DATA
+        $USER_DATA
+      fi
+
+      chmod 600 $USER_DATA
+      echo 'do not delete' > $LOCK
+      logger -t "cloud" "user-data executed"
+    fi
+    else
+      logger -t "cloud" "user-data is not a executable script"
+    fi
+fi
+exit 0

@@ -1,5 +1,6 @@
 ---
 - name: register primary network adapter name
+  when: ansible_os_family != "FreeBSD"
   shell: "ip link | grep UP | grep -v LOOPBACK | awk -F':' '{print $2}' | tr -d ' '"
   register: adapter_name
 

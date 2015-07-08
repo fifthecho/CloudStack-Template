@@ -1,22 +1,26 @@
 ---
-- name: add cloud-run-cloud-userdata script (RHEL)
+- name: add cloud-run-userdata script (RHEL)
   when: ansible_os_family == "RedHat"
   template: src=templates/RHEL/cloud-run-userdata-rhel.j2 dest=/usr/share/cloudstack/cloudstack-run-userdata mode=0755
 
-- name: add cloud-run-cloud-userdata script (Debian)
+- name: add cloud-run-userdata script (Debian)
   when: ansible_os_family == "Debian"
   template: src=templates/Debian/cloud-run-userdata-debian.j2 dest=/usr/share/cloudstack/cloudstack-run-userdata mode=0755
 
+- name: add cloud-run-userdata script (FreeBSD)
+  when: ansible_os_family == "FreeBSD"
+  template: src=templates/FreeBSD/cloud-run-userdata-freebsd.j2 dest=/usr/share/cloudstack/cloudstack-run-userdata mode=0755
+
 - name: setup cloudstack-set-guest-password (init)
-  when: upstart.stat.exists == false and systemd.stat.exists == false
+  when: upstart.stat.exists == false and systemd.stat.exists == false and ansible_os_family != "FreeBSD"
   file: state=link src=/usr/share/cloudstack/cloudstack-run-userdata dest=/etc/init.d/cloudstack-run-userdata mode=0755 force=yes
 
 - name: setup cloudstack-set-guest-password (upstart)
-  when: upstart.stat.exists == true and systemd.stat.exists == false
+  when: upstart.stat.exists == true and systemd.stat.exists == false and ansible_os_family != "FreeBSD"
   template: src=templates/upstart/run-userdata.upstart.j2 dest=/etc/init/cloudstack-run-userdata.conf mode=0644
 
 - name: setup cloudstack-set-guest-password (systemd)
-  when: upstart.stat.exists == false and systemd.stat.exists == true
+  when: upstart.stat.exists == false and systemd.stat.exists == true and ansible_os_family != "FreeBSD"
   template: src=templates/systemd/run-userdata.systemd.j2 dest=/usr/lib/systemd/system/cloudstack-run-userdata.service mode=0644
 
 - name: clear init legacy

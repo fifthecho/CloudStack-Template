@@ -10,7 +10,11 @@
 - name: test for FreeBSD
   when: ansible_os_family == "FreeBSD"
   stat: path=/etc/rc.conf get_md5=no
-  register: freebsd
+  register: fbsd
 
-#- debug: var=systemd
-#- debug: var=systemd
+- debug: var=systemd
+  ignore_errors: true
+- debug: var=upstart
+  ignore_errors: true
+- debug: var=fbsd
+  ignore_errors: true
