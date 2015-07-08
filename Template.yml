@@ -14,7 +14,12 @@
       service: name=syslog enabled=no
       ignore_errors: true
     - name: enable rsyslog (if not)
+      when: ansible_os_family != "FreeBSD"
       service: name=rsyslog enabled=yes
+      ignore_errors: true
+    - name: enable rsyslog (if not)
+      when: ansible_os_family == "FreeBSD"
+      service: name=rsyslogd enabled=yes
       ignore_errors: true
 
     - name: remove cloud user
@@ -80,7 +85,7 @@
       include: Template-Clean-Logs.yml
     - name: remove shell history
       shell: rm -f /root/.*history*
-    - name: remove ssh keys
-      shell: rm -f /etc/ssh/*host*key*
     - name: remove authorized keys
       file: path=/root/.ssh/authorized_keys state=absent
+    - name: remove ssh keys
+      shell: rm -f /etc/ssh/*host*key*
