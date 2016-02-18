@@ -10,7 +10,6 @@
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 7
   yum: name=http://mirror.pnl.gov/epel/7/x86_64/e/epel-release-7-5.noarch.rpm state=present
 - name: install "core" packages (RHEL)
-  when: ansible_os_family == "RedHat"
   yum: name={{ item }} state=latest
   with_items:
     - openssh-clients
@@ -32,15 +31,14 @@
     - bind-utils
     - iotop
     - htop
+    - mlocate
 - name: update system (RHEL)
-  when: ansible_os_family == "RedHat"
-  command: yum upgrade -y
-- name: set selinux to permissive
-  when: ansible_os_family == "RedHat"
-  selinux: policy=targeted state=permissive
-- name: set timezone to UTC (RHEL)
-  when: ansible_os_family == "RedHat"
-  shell: "rm -f /etc/localtime && ln -s /usr/share/zoneinfo/UTC /etc/localtime"
+  yum: name=* state=latest
 - name: install vmware tools (RHEL/vmware)
   yum: name=open-vm-tools state=latest
   when: ansible_os_family == "RedHat" and ansible_virtualization_type == "VMware"
+
+- name: set selinux to permissive
+  selinux: policy=targeted state=permissive
+- name: set timezone to UTC (RHEL)
+  file: state=link src=/usr/share/zoneinfo/UTC path=/etc/localtime

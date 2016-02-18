@@ -1,14 +1,8 @@
 ---
 - hosts: all
   tasks:
-    - name: setup packages for RHEL
-      include: Template-Packages-RHEL.yml
-    - name: setup packages for Debian/Ubuntu
-      include: Template-Packages-Debian.yml
-    - name: setup packages for SUSE
-      include: Template-Packages-SUSE.yml
-    - name: setup packages for FreeBSD
-      include: Template-Packages-FreeBSD.yml
+    - name: OS/Distro Specific Setup
+      include: Setup.yml
 
     - name: disable sysklogd (if present)
       service: name=syslog enabled=no

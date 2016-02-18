@@ -1,0 +1,33 @@
+---
+- name: install "core" packages (Mageia)
+  urpmi: name={{ item }} state=present update_cache=yes
+  with_items:
+    - openssh-clients
+    - vim-enhanced
+    - screen
+    - tmux
+    - curl
+    - wget
+    - lynx
+    - links
+    - sudo
+    - git
+    - rsyslog
+    - rsync
+    - nmap
+    - netcat-openbsd
+    - strace
+    - bind-utils
+    - iotop
+- name: update system (Mageia)
+  command: urpmi --auto-update --auto
+- name: install vmware tools (Mageia/vmware)
+  urpmi: name=open-vm-tools state=latest
+  when: ansible_os_family == "RedHat" and ansible_virtualization_type == "VMware"
+
+- name: set selinux to permissive
+  selinux: policy=targeted state=permissive
+- name: remove old timezone settings (RHEL)
+  file: path=/etc/localtime state=absent
+- name: set timezone to UTC (RHEL)
+  file: path=/etc/localtime src=/usr/share/zoneinfo/UTC state=link
