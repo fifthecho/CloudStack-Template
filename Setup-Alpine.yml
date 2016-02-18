@@ -1,0 +1,27 @@
+---
+- name: update apk cache (Alpine)
+  apk: update_cache=yes
+- name: install "core" packages (Alpine)
+  apk: name={{ item }} state=latest
+  with_items:
+    - openssh-client
+    - vim
+    - screen
+    - tmux
+    - curl
+    - wget
+    - lynx
+    - links
+    - sudo
+    - git
+    - rsyslog
+    - rsync
+    - nmap
+    - netcat-openbsd
+    - strace
+    - bind-tools
+- name: update system (Alpine)
+  apk: upgrade=yes
+
+- name: set timezone to UTC (Alpine)
+  file: path=/etc/localtime src=/etc/zoneinfo/UTC state=link

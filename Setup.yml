@@ -1,25 +1,28 @@
 ---
-- name: setup packages for RHEL
+- name: setup for RHEL
   when: ansible_os_family == "RedHat" and ansible_pkg_mgr == "yum"
   include: Setup-RHEL.yml
-- name: setup packages for Fedora
+- name: setup for Fedora
   when: ansible_os_family == "RedHat" and ansible_pkg_mgr == "dnf"
   include: Setup-Fedora.yml
-- name: setup packages for Debian/Ubuntu
+- name: setup for Debian/Ubuntu
   when: ansible_os_family == "Debian"
   include: Setup-Debian.yml
-- name: setup packages for SUSE
+- name: setup for SUSE
   when: ansible_os_family == "Suse"
   include: Template-Packages-SUSE.yml
-- name: setup packages for Mageia
+- name: setup for Mageia
   when: ansible_os_family == "Mageia"
   include: Setup-Mageia.yml
-- name: setup packages for FreeBSD
+- name: setup for Alpine Linux
+  when: ansible_os_family == "Alpine"
+  include: Setup-Alpine.yml
+- name: setup for FreeBSD
   when: ansible_os_family == "FreeBSD"
   include: Template-Packages-FreeBSD.yml
-- name: setup packages for OpenBSD
+- name: setup for OpenBSD
   when: ansible_os_family == "OpenBSD"
   include: Template-Packages-OpenBSD.yml
-- name: setup packages for NetBSD
+- name: setup for NetBSD
   when: ansible_os_family == "NA" and ansible_system == "NetBSD"
   include: Template-Packages-NetBSD.yml
