@@ -9,8 +9,8 @@
   when: ansible_os_family == "Debian"
   include: Setup-Debian.yml
 - name: setup for SUSE
-  when: ansible_os_family == "Suse"
-  include: Template-Packages-SUSE.yml
+  when: ansible_os_family == "Suse" or ansible_os_family == "openSUSE Leap"
+  include: Setup-SUSE.yml
 - name: setup for Mageia
   when: ansible_os_family == "Mageia"
   include: Setup-Mageia.yml

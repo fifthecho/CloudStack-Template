@@ -23,7 +23,6 @@
     - sudo
     - libselinux-python
     - git
-    - rsyslog
     - rsync
     - nmap
     - nc
@@ -32,6 +31,9 @@
     - iotop
     - htop
     - mlocate
+- name: install rsyslog on non-systemd
+  when: ansible_service_mgr != "systemd"
+  yum: name=rsyslog state=latest
 - name: update system (RHEL)
   yum: name=* state=latest
 - name: install vmware tools (RHEL/vmware)

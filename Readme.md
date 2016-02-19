@@ -3,6 +3,8 @@ CloudStack-Template
 
 ## Ansible Playbook for creating CloudStack templates
 
+### Please note that this Playbook requires Ansible 2.0 or greater
+
 These plays have been tested and work against:
 * Red Hat Enterprise Linux (and derivatives [Scientific/Centos/Oracle])
   * 5

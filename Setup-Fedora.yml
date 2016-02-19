@@ -13,7 +13,6 @@
     - sudo
     - libselinux-python
     - git
-    - rsyslog
     - rsync
     - nmap
     - nc
@@ -21,6 +20,9 @@
     - bind-utils
     - iotop
     - mlocate
+- name: install rsyslog on non-systemd
+  when: ansible_service_mgr != "systemd"
+  dnf: name=rsyslog state=latest
 - name: update system (Fedora)
   command: dnf upgrade -y
 - name: install vmware tools (Fedora/vmware)

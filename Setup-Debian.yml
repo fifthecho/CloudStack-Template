@@ -24,7 +24,6 @@
     - links
     - sudo
     - git
-    - rsyslog
     - rsync
     - netcat
     - nmap
@@ -39,6 +38,9 @@
   with_items:
     - linux-generic-lts-trusty
     - linux-image-generic-lts-trusty
+- name: install rsyslog on non-systemd
+  when: ansible_service_mgr != "systemd"
+  apt: name=rsyslog state=latest
 - name: update system (Debian)
   when: ansible_os_family == "Debian"
   apt: upgrade=dist update_cache=yes

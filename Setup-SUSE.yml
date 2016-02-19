@@ -1,6 +1,5 @@
 ---
 - name: install "core" packages (SUSE)
-  when: ansible_os_family == "Suse"
   zypper: name={{ item }} state=latest
   with_items:
     - vim
@@ -12,16 +11,16 @@
     - links
     - sudo
     - git
-    - rsyslog
     - rsync
     - nmap
     - netcat-openbsd
     - strace
     - bind-utils
     - iotop
+- name: install rsyslog on non-systemd
+  when: ansible_service_mgr != "systemd"
+  zypper: name=rsyslog state=latest
 - name: update system (SUSE)
-  when: ansible_os_family == "Suse"
-  command: zypper update -y
+  zypper: name=* state=latest
 - name: set timezone to UTC (SUSE)
-  when: ansible_os_family == "Suse"
-  shell: "rm -f /etc/localtime && ln -s /usr/share/zoneinfo/UTC /etc/localtime"
+  file: path=/etc/localtime src=/usr/share/zoneinfo/UTC state=link
