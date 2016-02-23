@@ -41,8 +41,6 @@ echo "Setting up /etc/hosts for IP address $IP"
 logger -t "Setup" "Setting up /etc/hosts for IP address $IP"
 echo "$IP      $HOST_NAME" >> /etc/hosts
 
-chkconfig cloudstack-firstboot off
-
 if [ -f /etc/systemd/system/cloudstack-firstboot.service ]
   then
     systemctl disable cloudstack-firstboot

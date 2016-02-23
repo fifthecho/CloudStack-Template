@@ -1,74 +1,63 @@
 #!env bash
 function find_lease() {
-
-  # Determine primary network adapter name
-  if [ $(uname) == "Linux" ]; then
-    NIC=`ip link | grep state\ UP | grep -v LOOPBACK | awk -F':' '{print $2}' | tr -d ' '`
-  elif [ $(uname) == "FreeBSD" ]; then
-    NIC=`ifconfig | grep UP | grep -v LOOPBACK | awk -F':' '{print $1}' | tr -d ' '`
-  fi
-
-  # Add your DHCP lease folders here
+  # Add your method of finding a DHCP lease here
   if [ -f /etc/debian_version ]; then
     # Ubuntu / Debian
-    DHCP_FOLDERS="/var/lib/dhclient/ /var/lib/dhcp3/ /var/lib/dhcp/"
+    DHCLIENT_BIN=$(which dhclient)
+    DHCLIENT="dhclient"
   elif [ -f /etc/redhat-release ]; then
     # Redhat / CentOS / Scientific Linux
-    DHCP_FOLDERS="/var/lib/dhclient/ /var/lib/dhcp3/"
+    DHCLIENT_BIN=$(which dhclient)
+    DHCLIENT="dhclient"
+  elif [ -f /etc/zypp/zypper.conf ]; then
+    #SUSE
+    DHCLIENT_BIN=$(which wicked)
+    DHCLIENT="wicked"
+  elif [ -f /etc/alpine-release ]; then
+    DHCLIENT_BIN=$(which dhcpcd)
+    DHCLIENT="dhcpcd"
   elif [ -f /etc/freebsd-update.conf ]; then
     # FreeBSD
-    DHCP_FOLDERS="/var/db/"
+    echo "Not configured yet."
   else
     # Others
-    DHCP_FOLDERS="/var/lib/dhclient/ /var/lib/dhcp3/"
-  fi
-
-  for TEST_DIRECTORY in $DHCP_FOLDERS; do
-    if [ -d $TEST_DIRECTORY ]; then
-      LEASE_DIRECTORY=$TEST_DIRECTORY
-    fi
-  done
-
-  DHCLIENT=$(which dhclient)
-  RESTART_DHCLIENT=true
-
-  RUNNING_NETWORKMANAGER=$(ps aux | grep -v grep | grep sbin\/NetworkManager | wc -l)
-
-  if [[ -z $RUNNING_NETWORKMANAGER || $RUNNING_NETWORKMANAGER -eq 0 ]]; then
-    if [ -e $LEASE_DIRECTORY/*-*$NIC* ] || [ -e $LEASE_DIRECTORY/*.$NIC* ]; then
-      LEASE_FILE=$(ls $LEASE_DIRECTORY*$NIC*)
-      logger -t "cloud" "DHCP file ($LEASE_FILE) exists. No need to restart dhclient."
-      RESTART_DHCLIENT=false
-    fi
-
-    if [ $RESTART_DHCLIENT = false ]; then
-      LEASE_SIZE=$(wc -l $LEASE_FILE | awk {'print $1'})
-      if [ $LEASE_SIZE -eq 0 ]; then
-        RESTART_DHCLIENT=true
-      fi
-    fi
-
-    if [ $RESTART_DHCLIENT = true ]; then
-      logger -t "cloud" "DHCP file does not exist. Restarting dhclient."
-      DHCLIENT_PID=$(ps ax | grep dhclient | grep -v grep | uniq | awk {'print $1'})
-      if [ -n $DHCLIENT_PID ]; then
-            for CLIENTPID in $DHCLIENT_PID; do
-              kill $CLIENTPID
-              rm -f /var/run/dhc*
-            done
-      fi
-      $DHCLIENT -lf $LEASE_DIRECTORY/dhclient-$NIC.leases -pf /var/run/dhclient-$NIC.pid $NIC
-      sleep 5
-      find_lease
-    fi
-  fi
-
-  if [[ -n $RUNNING_NETWORKMANAGER && $RUNNING_NETWORKMANAGER -ge 1 ]] ; then
-    LEASE_FILE=$( ps -eo args | grep -v grep | grep dhclient | sed -e 's/\s\+/\n/g' | grep lease | uniq)
+    echo "Unknown DHCP config."
 
   fi
 
-  # echo "Using DHCP lease from $LEASE_FILE"
-  logger -t "cloud" "Using DHCP lease from $LEASE_FILE"
-  export LEASE_FILE
+  completed=0
+
+  running_networkmanager=$(pgrep NetworkManager | wc -l)
+
+  if [[ -n $running_networkmanager && $running_networkmanager -ge 1 ]] ; then
+    LEASE_FILE=$(pgrep -a dhclient | sed -e 's/\s\+/\n/g' | grep lease | uniq)
+    completed=1
+  fi
+
+  if [[ $DHCLIENT == "dhcpcd" && completed -eq 0 ]]; then
+    $DHCLIENT_BIN -U "$NIC" > "/var/lib/dhcp/dhcp-$NIC.lease" 2>&1
+    LEASE_FILE="/var/lib/dhcp/dhcp-$NIC.lease"
+    completed=1
+  fi
+
+  if [[ $DHCLIENT == "wicked" && completed -eq 0 ]]; then
+    LEASE_FILE="/var/lib/wicked/lease-$NIC-dhcp-ipv4.xml"
+    completed=1
+  fi
+
+  if [[ $DHCLIENT == "dhclient" && completed -eq 0 ]]; then
+    dhclient_pid=$(pgrep dhclient)
+    LEASE_FILE=$(ps $dhclient_pid | sed -e 's/\s\+/\n/g' | grep lease | uniq)
+    completed=1
+  fi
+
+  if [[ completed -eq 1 ]]; then
+    # echo "Using DHCP lease from $LEASE_FILE"
+    logger -t "cloud" "Using DHCP lease from $LEASE_FILE"
+    export LEASE_FILE
+  else
+    logger -t "cloud" "No DHCP lease found. Please report this to https://github.com/fifthecho/CloudStack-Template"
+    exit 1
+  fi
+
 }

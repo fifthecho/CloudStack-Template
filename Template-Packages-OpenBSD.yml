@@ -1,0 +1,17 @@
+---
+- name: install "core" packages (OpenBSD)
+  openbsd_pkg: name={{ item }} state=present
+  with_items:
+    - screen
+    - curl
+    - wget
+    - lynx
+    - links
+    - sudo-1.8.14.3
+    - bash
+    - git
+    - rsyslog
+    - rsync
+    - nmap
+- name: update all packages (OpenBSD)
+  openbsd_pkg: name=* state=latest

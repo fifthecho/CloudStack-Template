@@ -1,0 +1,16 @@
+---
+- name: register upstart services
+  when: ansible_service_mgr == "upstart"
+  shell: initctl reload-configuration
+- name: register systemd services
+  when: ansible_service_mgr == "systemd"
+  shell: systemctl daemon-reload
+
+- name: enable cloudstack-password service
+  service: name=cloudstack-set-guest-password enabled=yes
+- name: enable cloudstack-sshkey service
+  service: name=cloudstack-set-guest-sshkey enabled=yes
+- name: enable cloudstack-userdata service
+  service: name=cloudstack-run-userdata enabled=yes
+- name: enable firstboot-cloudstack service
+  service: name=cloudstack-firstboot enabled=yes

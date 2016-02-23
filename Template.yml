@@ -18,51 +18,37 @@
 
     - name: remove cloud user
       user: name=cloud state=absent
-    - name: set root password to "cloudstack" (in case init scripts fail)
-      user: name=root update_password=always password=$6$hIuIfYHMi8Vd$QCoX.nOo551xKqhIPjdc/aUhtSTpKf3kR0q5MjXrwOgP5Iu9G.MVojQZfvdK2hPqimnY16htsgLktuYhUehNQ0
+    
 
     - name: add CloudStack login splash (Ubuntu)
-      template: src=templates/Generic/motd.j2 dest=/etc/motd.tail
       when: ansible_distribution == "Ubuntu"
+      template: src=templates/Generic/motd.j2 dest=/etc/motd.tail
     - name: add CloudStack login spash (Others)
-      template: src=templates/Generic/motd.j2 dest=/etc/motd
       when: ansible_distribution != "Ubuntu"
+      template: src=templates/Generic/motd.j2 dest=/etc/motd
+      
     - name: create ssh directory
       file: state=directory mode=0700 path=/root/.ssh
 
     - name: create directory to store cloudstack client scripts
       file: state=directory mode=0755 path=/usr/share/cloudstack
 
-    - name: register init system variables
-      include: Template-Test-Init-System.yml
-
     - name: setup common functions for init scripts
       include: Template-Cloud-Functions.yml
 
-    - name: setup cloudstack-set-guest-password
-      include: Template-Cloud-Password.yml
-    - name: setup cloudstack-set-guest-sshkey
-      include: Template-Cloud-SSH-Key.yml
-    - name: setup cloudstack-run-userdata
-      include: Template-Cloud-Userdata.yml
-    - name: setup cloudstack-firstboot
-      include: Template-Cloud-Firstboot.yml
-
-    - name: register upstart services
-      when: upstart.stat.exists == true and systemd.stat.exists == false
-      shell: initctl reload-configuration
-    - name: register systemd services
-      when: upstart.stat.exists == false and systemd.stat.exists == true
-      shell: systemctl daemon-reload
-
-    - name: enable cloudstack-password service
-      service: name=cloudstack-set-guest-password enabled=yes
-    - name: enable cloudstack-sshkey service
-      service: name=cloudstack-set-guest-sshkey enabled=yes
-    - name: enable cloudstack-userdata service
-      service: name=cloudstack-run-userdata enabled=yes
-    - name: enable firstboot-cloudstack service
-      service: name=cloudstack-firstboot enabled=yes
+    - name: setup init services
+      include: Template-Create-Services.yml
+    - name: register init services
+      include: Template-Enable-Services.yml
 
     - name: setup networking
-      include: Template-Networking.yml
+      include: Setup-Networking.yml
+    - name: instance cleanup
+      include: Template-Cleanup.yml
+
+    - name: set root password to "cloudstack" (in case init scripts fail)
+      when: ansible_os_family != "Mageia"
+      user: name=root update_password=always password=$6$wbv2I8c6qYN9$5P8feP936YgJelVZFts0grMjYevgQZ6gvu8gC06dxwWk0t02qPhM7X9xEZn6CU2AXMDZC9RW8Gnz7eE5WfH4B/
+
+    - name: anonymize vm
+      include: Template-Anonymize.yml

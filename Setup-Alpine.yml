@@ -4,6 +4,7 @@
 - name: install "core" packages (Alpine)
   apk: name={{ item }} state=latest
   with_items:
+    - dhcpcd
     - openssh-client
     - vim
     - screen
@@ -25,3 +26,15 @@
 
 - name: set timezone to UTC (Alpine)
   file: path=/etc/localtime src=/etc/zoneinfo/UTC state=link
+
+- name: create directory to hold DHCP leases for CloudStack scripts
+  file: state=directory mode=0755 path=/var/lib/dhcp
+
+- name: setup services (Alpine)
+  service: enabled=yes name={{ item }}
+  with_items:
+    - rsyslog
+    - cron
+    - dhcpcd
+    - nptd
+    - sshd

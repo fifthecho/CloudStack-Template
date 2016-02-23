@@ -1,4 +1,9 @@
 ---
+- name: clear init legacy
+  when: ansible_os_family == "RedHat"
+  shell: chkconfig --del cloudstack-firstboot
+  ignore_errors: true
+
 - name: add cloud-firstboot script (RHEL)
   when: ansible_os_family == "RedHat"
   template: src=templates/RHEL/firstboot-rhel.sh.j2 dest=/usr/share/cloudstack/cloudstack-firstboot mode=0755
@@ -7,27 +12,26 @@
   when: ansible_os_family == "Debian"
   template: src=templates/Debian/firstboot-debian.sh.j2 dest=/usr/share/cloudstack/cloudstack-firstboot mode=0755
 
+- name: add cloud-firstboot script (SUSE)
+  when: ansible_os_family == "Suse" or ansible_os_family == "openSUSE Leap"
+  template: src=templates/SUSE/firstboot-suse.sh.j2 dest=/usr/share/cloudstack/cloudstack-firstboot mode=0755
+
+- name: add cloud-firstboot script (Mageia)
+  when: ansible_os_family == "Mageia"
+  template: src=templates/Mageia/firstboot-mageia.sh.j2 dest=/usr/share/cloudstack/cloudstack-firstboot mode=0755
+
 - name: add cloud-firstboot script (FreeBSD)
   when: ansible_os_family == "FreeBSD"
   template: src=templates/FreeBSD/firstboot-freebsd.j2 dest=/usr/share/cloudstack/cloudstack_firstboot mode=0755
 
-- name: setup cloudstack-firstboot (init)
-  when: upstart.stat.exists == false and systemd.stat.exists == false and ansible_os_family != "FreeBSD"
+- name: setup cloudstack-firstboot (sysvinit)
+  when: ansible_service_mgr == "sysvinit" or ansible_service_mgr == "init\n"
   file: state=link force=yes src=/usr/share/cloudstack/cloudstack-firstboot dest=/etc/init.d/cloudstack-firstboot mode=0755
 
 - name: setup cloudstack-firstboot (upstart)
-  when: upstart.stat.exists == true and systemd.stat.exists == false and ansible_os_family != "FreeBSD"
+  when: ansible_service_mgr == "upstart"
   template: src=templates/upstart/firstboot.upstart.j2 dest=/etc/init/cloudstack-firstboot.conf mode=0644
 
 - name: setup cloudstack-firstboot (systemd)
-  when: upstart.stat.exists == false and systemd.stat.exists == true and ansible_os_family != "FreeBSD"
-  template: src=templates/systemd/firstboot.systemd.j2 dest=/usr/lib/systemd/system/cloudstack-firstboot.service mode=0644
-
-- name: setup cloudstack-set-guest-sshkey (FreeBSD)
-  when: upstart.stat.exists == false and systemd.stat.exists == false and ansible_os_family == "FreeBSD"
-  template: src=templates/FreeBSD/firstboot-rc.j2 dest=/usr/local/etc/rc.d/cloudstack_firstboot mode=0755
-
-- name: clear init legacy
-  when: ansible_os_family == "RedHat"
-  shell: chkconfig --del cloudstack-firstboot
-  ignore_errors: true
+  when: ansible_service_mgr == "systemd"
+  template: src=templates/systemd/firstboot.systemd.j2 dest=/etc/systemd/system/cloudstack-firstboot.service mode=0644

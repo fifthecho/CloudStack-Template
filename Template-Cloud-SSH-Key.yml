@@ -1,37 +1,29 @@
----    
-- name: add cloud-set-guest-sshkey script (RHEL)
+---
+- name: clear init legacy
   when: ansible_os_family == "RedHat"
-  template: src=templates/RHEL/cloud-set-guest-sshkey-rhel.j2 dest=/usr/share/cloudstack/cloudstack-set-guest-sshkey mode=0755
+  shell: chkconfig --del cloudstack-set-guest-sshkey
+  ignore_errors: true
+  
+- name: add cloud-set-guest-sshkey script (dhclient)
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Debian" or ansible_os_family == "Ubuntu" or ansible_os_family == "Mageia"
+  template: src=templates/dhclient/cloud-set-guest-sshkey.j2 dest=/usr/share/cloudstack/cloudstack-set-guest-sshkey mode=0755
 
-- name: add cloud-set-guest-sshkey script (Debian)
-  when: ansible_distribution == "Debian"
-  template: src=templates/Debian/cloud-set-guest-sshkey-debian.j2 dest=/usr/share/cloudstack/cloudstack-set-guest-sshkey mode=0755
-
-- name: add cloud-set-guest-sshkey script (Ubuntu)
-  when: ansible_distribution == "Ubuntu"
-  template: src=templates/Ubuntu/cloud-set-guest-sshkey-ubuntu.j2 dest=/usr/share/cloudstack/cloudstack-set-guest-sshkey mode=0755
+- name: add cloud-set-guest-sshkey script (wicked)
+  when: ansible_os_family == "Suse" or ansible_os_family == "openSUSE Leap"
+  template: src=templates/wicked/cloud-set-guest-sshkey.j2 dest=/usr/share/cloudstack/cloudstack-set-guest-sshkey mode=0755
 
 - name: add cloud-set-guest-sshkey script (FreeBSD)
   when: ansible_os_family == "FreeBSD"
   template: src=templates/FreeBSD/cloud-set-guest-sshkey-freebsd.j2 dest=/usr/share/cloudstack/cloudstack_set_guest_sshkey mode=0755
 
-- name: setup cloudstack-set-guest-sshkey (init)
-  when: upstart.stat.exists == false and systemd.stat.exists == false and ansible_os_family != "FreeBSD"
+- name: setup cloudstack-set-guest-sshkey (sysvinit)
+  when: ansible_service_mgr == "sysvinit" or ansible_service_mgr == "init\n"
   file: state=link src=/usr/share/cloudstack/cloudstack-set-guest-sshkey dest=/etc/init.d/cloudstack-set-guest-sshkey mode=0755 force=yes
 
 - name: setup cloudstack-set-guest-sshkey (upstart)
-  when: upstart.stat.exists == true and systemd.stat.exists == false and ansible_os_family != "FreeBSD"
+  when: ansible_service_mgr == "upstart"
   template: src=templates/upstart/set-guest-sshkey.upstart.j2 dest=/etc/init/cloudstack-set-guest-sshkey.conf mode=0644
 
 - name: setup cloudstack-set-guest-sshkey (systemd)
-  when: upstart.stat.exists == false and systemd.stat.exists == true and ansible_os_family != "FreeBSD"
-  template: src=templates/systemd/set-guest-sshkey.systemd.j2 dest=/usr/lib/systemd/system/cloudstack-set-guest-sshkey.service mode=0644 
-
-- name: setup cloudstack-set-guest-sshkey (FreeBSD)
-  when: upstart.stat.exists == false and systemd.stat.exists == false and ansible_os_family == "FreeBSD"
-  template: src=templates/FreeBSD/cloud-sshkey-rc.j2 dest=/usr/local/etc/rc.d/cloudstack_set_guest_sshkey mode=0755
-
-- name: clear init legacy
-  when: ansible_os_family == "RedHat"
-  shell: chkconfig --del cloudstack-set-guest-sshkey
-  ignore_errors: true
+  when: ansible_service_mgr == "systemd"
+  template: src=templates/systemd/set-guest-sshkey.systemd.j2 dest=/etc/systemd/system/cloudstack-set-guest-sshkey.service mode=0644 

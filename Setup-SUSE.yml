@@ -10,6 +10,7 @@
     - lynx
     - links
     - sudo
+    - python-selinux
     - git
     - rsync
     - nmap
@@ -17,10 +18,11 @@
     - strace
     - bind-utils
     - iotop
+    - mlocate
 - name: install rsyslog on non-systemd
   when: ansible_service_mgr != "systemd"
   zypper: name=rsyslog state=latest
 - name: update system (SUSE)
-  zypper: name=* state=latest
+  command: zypper update -y
 - name: set timezone to UTC (SUSE)
   file: path=/etc/localtime src=/usr/share/zoneinfo/UTC state=link

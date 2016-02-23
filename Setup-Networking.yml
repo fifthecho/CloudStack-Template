@@ -4,12 +4,12 @@
   shell: "ip link | grep UP | grep -v LOOPBACK | awk -F':' '{print $2}' | tr -d ' '"
   register: adapter_name
 
-- name: setup networking (RHEL)
-  when: ansible_os_family == "RedHat"
+- name: setup networking (RHEL/Fedora/Mageia)
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Mageia"
   template: src=templates/RHEL/ifcfg-rhel.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{adapter_name.stdout}} mode=0644
 
-- name: remove udev network naming (RHEL)
-  when: ansible_os_family == "RedHat"
+- name: remove udev network naming (RHEL/Fedora/Mageia)
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Mageia"
   file: path=/etc/udev/rules.d/70-persistent-net.rules state=absent
 
 - name: setup networking (Debian)

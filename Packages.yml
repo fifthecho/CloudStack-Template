@@ -1,0 +1,21 @@
+---
+- hosts: all
+  tasks:
+    - name: setup packages for RHEL
+      when: ansible_os_family == "RedHat"
+      include: Template-Packages-RHEL.yml
+    - name: setup packages for Debian/Ubuntu
+      when: ansible_os_family == "Debian"
+      include: Template-Packages-Debian.yml
+    - name: setup packages for SUSE
+      when: ansible_os_family == "Suse"
+      include: Template-Packages-SUSE.yml
+    - name: setup packages for FreeBSD
+      when: ansible_os_family == "FreeBSD"
+      include: Template-Packages-FreeBSD.yml
+    - name: setup packages for OpenBSD
+      when: ansible_os_family == "OpenBSD"
+      include: Template-Packages-OpenBSD.yml
+    - name: setup packages for NetBSD
+      when: ansible_os_family == "NA" and ansible_system == "NetBSD"
+      include: Template-Packages-NetBSD.yml

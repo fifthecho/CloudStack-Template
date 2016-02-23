@@ -1,0 +1,22 @@
+---
+- name: update package database
+  shell: pkgin update
+- name: install "core" packages (NetBSD)
+  pkgin: name={{ item }} state=present
+  with_items:
+    - screen
+    - tmux
+    - curl
+    - wget
+    - lynx
+    - links
+    - sudo
+    - bash
+    - git-base
+    - git-contrib
+    - rsyslog
+    - rsync
+    - nmap
+    - netcat
+- name: update all packages (NetBSD)
+  shell: pkgin full-upgrade -y

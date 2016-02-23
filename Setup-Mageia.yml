@@ -6,6 +6,7 @@
     - vim-enhanced
     - screen
     - tmux
+    - python-selinux
     - curl
     - wget
     - lynx
@@ -25,9 +26,7 @@
   urpmi: name=open-vm-tools state=latest
   when: ansible_os_family == "RedHat" and ansible_virtualization_type == "VMware"
 
-- name: set selinux to permissive
-  selinux: policy=targeted state=permissive
-- name: remove old timezone settings (RHEL)
+- name: remove old timezone settings (Mageia)
   file: path=/etc/localtime state=absent
-- name: set timezone to UTC (RHEL)
+- name: set timezone to UTC (Mageia)
   file: path=/etc/localtime src=/usr/share/zoneinfo/UTC state=link

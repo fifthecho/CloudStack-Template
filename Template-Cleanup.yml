@@ -1,17 +1,5 @@
---
-- name: remove upstart overrides (if present)
-  file: path=/etc/init/firstboot-cloudstack.override state=absent
-- name: remove userdata lock (if present)
-  file: path=/var/lib/cloud/user-data.ran state=absent
-- name: remove userdata history
-  shell: rm -Rf /var/lib/cloud/instances/*
-- name: remove dhcp history
-  shell: rm -f /var/lib/dhc*/dhcl*leas*
+---
 - name: cleanup logs
   include: Template-Clean-Logs.yml
 - name: remove shell history
   shell: rm -f /root/.*history*
-- name: remove authorized keys
-  file: path=/root/.ssh/authorized_keys state=absent
-- name: remove ssh keys
-  shell: rm -f /etc/ssh/*host*key*

@@ -1,0 +1,9 @@
+---
+- name: setup cloudstack-set-guest-password
+  include: Template-Cloud-Password.yml
+- name: setup cloudstack-set-guest-sshkey
+  include: Template-Cloud-SSH-Key.yml
+- name: setup cloudstack-run-userdata
+  include: Template-Cloud-Userdata.yml
+- name: setup cloudstack-firstboot
+  include: Template-Cloud-Firstboot.yml

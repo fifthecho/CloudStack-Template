@@ -1,8 +1,7 @@
 ---
 - name: install EPEL (RHEL 5)
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 5
-  shell: rpm -Uvh http://mirror.pnl.gov/epel/5/i386/epel-release-5-4.noarch.rpm
-  ignore_errors: true
+  yum: name=http://mirror.pnl.gov/epel/5/i386/epel-release-5-4.noarch.rpm state=present
 - name: install EPEL (RHEL 6)
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 6
   yum: name=http://mirror.pnl.gov/epel/6/i386/epel-release-6-8.noarch.rpm state=present
@@ -31,6 +30,8 @@
     - iotop
     - htop
     - mlocate
+    - yum-utils
+    - bash-completion
 - name: install rsyslog on non-systemd
   when: ansible_service_mgr != "systemd"
   yum: name=rsyslog state=latest
@@ -43,4 +44,7 @@
 - name: set selinux to permissive
   selinux: policy=targeted state=permissive
 - name: set timezone to UTC (RHEL)
-  file: state=link src=/usr/share/zoneinfo/UTC path=/etc/localtime
+  file: state=link src=/usr/share/zoneinfo/UTC path=/etc/localtime force=yes
+
+- name: cleanup yum
+  shell: "yum clean all"

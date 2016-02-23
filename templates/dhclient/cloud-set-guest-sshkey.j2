@@ -1,31 +1,37 @@
 #!/bin/bash 
 #
-# Init file for SSH Public Keys Download Client
+# cloud-set-guest-sshkey    SSH Public Keys Download Client
 #
-### BEGIN INIT INFO
-# Provides:             cloud-set-guest-sshkey
-# Required-Start:       $local_fs $syslog $network
-# Required-Stop:        $local_fs $syslog $network
-# Default-Start:        2 3 4 5
-# Default-Stop:         0 1 6
-# Short-Description:    SSH Public Keys Download Client
-### END INIT INFO
-
-set -e
-
-. /lib/lsb/init-functions
-
+# chkconfig: 2345 50 02
+# description: SSH Public Keys Download Client
+#
 # Modify this line to specify the user (default is root)
 user=root
 
+### BEGIN INIT INFO
+# Provides: cloud-set-guest-sshkey
+# Required-Start: $local_fs $network $sshd
+# Required-Stop: $local_fs $syslog
+# Should-Start: $syslog
+# Should-Stop: $network $syslog
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: 
+# Description:       SSH Public Keys Download Client
+### END INIT INFO
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
 . /usr/share/cloudstack/cloudstack-common-functions
+
 
 function cloud_set_guest_sshkey() {
     keys_received=0
     file_count=0
     sleep $[ 1 + $[ RANDOM % 10 ]]
     find_lease
-
+        
     SSHKEY_SERVER_IP=$(grep dhcp-server-identifier $LEASE_FILE | uniq | tail -1 | awk '{print $NF}' | tr -d '\;')
 
     if [ -n $SSHKEY_SERVER_IP ]; then
@@ -41,6 +47,7 @@ function cloud_set_guest_sshkey() {
         logger -t "cloud" "Could not find ssh key server IP in $LEASE_FILE"
     fi
 
+
     # did we find the keys anywhere?
     if [ "$keys_received" == "0" ]; then
         logger -t "cloud" "Failed to get ssh keys from any server"
@@ -52,7 +59,6 @@ function cloud_set_guest_sshkey() {
     sshdir=$homedir/.ssh
     authorized=$sshdir/authorized_keys
 
-
     if [ ! -e $sshdir ]; then
         mkdir $sshdir
     fi
@@ -61,34 +67,31 @@ function cloud_set_guest_sshkey() {
         touch $authorized
     fi
 
-    #cat $authorized|grep -v "$publickey" > $authorized
-    #echo "$publickey" >> $authorized
-    #To support user copied ssh keys
     if [ `grep -c "$publickey" $authorized` == 0 ]; then
             echo "$publickey" >> $authorized
+            /sbin/restorecon -R $homedir/.ssh
     fi
 }
 
+# See how we were called.
 case "$1" in
   start)
-      log_action_msg "Starting cloud" "cloud-set-guest-sshkey"
-      sleep 10
+      action $"Starting cloud-set-guest-sshkey: " /bin/true
       cloud_set_guest_sshkey
-      if [ $? -eq 0 ]; then
-          log_end_msg 0
-      else
-          log_end_msg 1
-      fi
-      ;;
+      RETVAL=$?
+    ;;
   stop)
-      log_action_msg "Stopping cloud" "cloud-set-guest-sshkey"
-      log_end_msg 0
+      action $"Shutting down cloud-set-guest-sshkey: " /bin/true
+      RETVAL=$?
+      ;;
+  restart)
+      $0 stop
+      $0 start
       ;;
   *)
-      log_action_msg "Usage: /etc/init.d/cloud-set-guest-sshkey {start}"
-      exit 1
+      echo $"Usage: cloud-set-guest-sshkey {start}"
+      RETVAL=2
       ;;
 esac
 
-exit 0
-
+exit $RETVAL
