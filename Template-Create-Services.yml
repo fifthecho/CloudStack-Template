@@ -1,4 +1,16 @@
 ---
+- name: register Debian/Ubuntu init functions
+  when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu"
+  stat: path=/lib/lsb/init-functions
+  register: platform_function_library_debian
+- name: register RHEL/Mageia init functions
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Mageia"
+  stat: path=/etc/rc.d/init.d/functions
+  register: platform_function_library_rhel
+- name: register SUSE init functions
+  when: ansible_os_family == "Suse" or ansible_os_family == "openSUSE Leap"
+  stat: path=/etc/rc.status
+  register: platform_function_library_suse
 - name: setup cloudstack-set-guest-password
   include: Template-Cloud-Password.yml
 - name: setup cloudstack-set-guest-sshkey
