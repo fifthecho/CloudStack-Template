@@ -6,8 +6,8 @@
 # description: Prepare new VM
 ### BEGIN INIT INFO
 # Provides:          firstboot-cloudstack
-# Required-Start:    $network $local_fs $remote_fs $syslog $all
-# Required-Stop:     $network $local_fs $remote_fs $syslog $all
+# Required-Start:    $network $local_fs $syslog
+# Required-Stop:     $network $local_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # X-Start-Before:    $sshd
@@ -44,18 +44,27 @@ start_daemon () {
   echo "Setting up /etc/hosts for IP address $IP" 
   logger -t "Setup" "Setting up /etc/hosts for IP address $IP"
 
-  test -f /etc/ssh/ssh_host_dsa_key || ssh-keygen -t dsa -N "" -f /etc/ssh/ssh_host_dsa_key 
-  test -f /etc/ssh/ssh_host_rsa_key || ssh-keygen -t rsa -N "" -f /etc/ssh/ssh_host_rsa_key 
-  test -f /etc/ssh/ssh_host_ecdsa_key || ssh-keygen -t ecdsa -N "" -f /etc/ssh/ssh_host_ecdsa_key
-  test -f /lib/init/upstart-job || service ssh restart
+  echo "Generating new SSH keys"
+  logger -t "Setup" "Generating new SSH keys"
+
+  if [ -f /etc/systemd/system/cloudstack-firstboot.service ]; then
+    dpkg-reconfigure openssh-server
+  elif [ -f /lib/init/upstart-job ]; then
+    test -f /etc/ssh/ssh_host_dsa_key || ssh-keygen -q -t dsa -N "" -f /etc/ssh/ssh_host_dsa_key 
+    test -f /etc/ssh/ssh_host_rsa_key || ssh-keygen -q -t rsa -N "" -f /etc/ssh/ssh_host_rsa_key 
+    test -f /etc/ssh/ssh_host_ecdsa_key || ssh-keygen -q -t ecdsa -N "" -f /etc/ssh/ssh_host_ecdsa_key
+    test -f /etc/ssh/ssh_host_ed25519_key || ssh-keygen -q -t ed25519 -N "" -f /etc/ssh/ssh_host_ed25519_key
+    mkdir /var/run/sshd
+    exec /usr/sbin/sshd -D &
+  else
+    dpkg-reconfigure openssh-server
+  fi
 
   /usr/sbin/update-rc.d cloudstack-firstboot disable
   /usr/sbin/update-rc.d cloudstack-firstboot remove
-  if [ -f /lib/init/upstart-job ]
-  then
+  if [ -f /lib/init/upstart-job ]; then
     echo manual > /etc/init/cloudstack-firstboot.override
   fi
-  
 }
 
 case "$1" in

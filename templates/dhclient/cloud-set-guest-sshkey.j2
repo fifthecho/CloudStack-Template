@@ -80,19 +80,19 @@ function cloud_set_guest_sshkey() {
 
     if [ `grep -c "$publickey" $authorized` == 0 ]; then
             echo "$publickey" >> $authorized
-            /sbin/restorecon -R $homedir/.ssh
+           {% if function_caller == "action" %} /sbin/restorecon -R $homedir/.ssh {% endif %}
     fi
 }
 
 # See how we were called.
 case "$1" in
   start)
-      {{ function_caller }} $"Starting cloud-set-guest-sshkey: " /bin/true
+      {{ function_caller }} $"Starting cloud-set-guest-sshkey: "{% if function_caller == "action" %} /bin/true{% endif %}
       cloud_set_guest_sshkey
       RETVAL=$?
     ;;
   stop)
-      {{ function_caller }} $"Shutting down cloud-set-guest-sshkey: " /bin/true
+      {{ function_caller }} $"Shutting down cloud-set-guest-sshkey: "{% if function_caller == "action" %} /bin/true{% endif %}
       RETVAL=$?
       ;;
   restart)

@@ -3,3 +3,7 @@
   include: Template-Clean-Logs.yml
 - name: remove shell history
   shell: rm -f /root/.*history*
+- name: remove junk from /home
+  shell: rm -Rf /home/*
+- name: remove junk in /root
+  shell: rm -Rf /root/*

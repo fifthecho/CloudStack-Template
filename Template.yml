@@ -22,10 +22,10 @@
 
     - name: add CloudStack login splash (Ubuntu)
       when: ansible_distribution == "Ubuntu"
-      template: src=templates/Generic/motd.j2 dest=/etc/motd.tail
+      template: src=templates/Generic-Linux/motd.j2 dest=/etc/motd.tail
     - name: add CloudStack login spash (Others)
       when: ansible_distribution != "Ubuntu"
-      template: src=templates/Generic/motd.j2 dest=/etc/motd
+      template: src=templates/Generic-Linux/motd.j2 dest=/etc/motd
       
     - name: create ssh directory
       file: state=directory mode=0700 path=/root/.ssh

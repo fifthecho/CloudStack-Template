@@ -121,12 +121,12 @@ function cloud_run_userdata() {
 # See how we were called.
 case "$1" in
   start)
-    {{ function_caller }} $"Starting cloud-run-userdata: " /bin/true
+    {{ function_caller }} $"Starting cloud-run-userdata: "{% if function_caller == "action" %} /bin/true{% endif %}
     cloud_run_userdata
     RETVAL=$?
     ;;
   stop)
-    {{ function_caller }} $"Shutting down cloud-run-userdata: " /bin/true
+    {{ function_caller }} $"Shutting down cloud-run-userdata: "{% if function_caller == "action" %} /bin/true{% endif %}
     RETVAL=$?
     ;;
   restart)

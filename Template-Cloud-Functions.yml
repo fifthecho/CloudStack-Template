@@ -1,3 +1,3 @@
 ---
 - name: add cloud-common-functions script
-  template: src=templates/Generic/cloud-common-functions.j2 dest=/usr/share/cloudstack/cloudstack-common-functions mode=0755
+  template: src=templates/Generic-Linux/cloud-common-functions.j2 dest=/usr/share/cloudstack/cloudstack-common-functions mode=0755

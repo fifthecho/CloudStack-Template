@@ -12,5 +12,5 @@
   service: name=cloudstack-set-guest-sshkey enabled=yes
 - name: enable cloudstack-userdata service
   service: name=cloudstack-run-userdata enabled=yes
-- name: enable firstboot-cloudstack service
+- name: enable cloudstack-firstboot service
   service: name=cloudstack-firstboot enabled=yes
